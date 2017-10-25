@@ -9,7 +9,10 @@
         "nrf_drv_gpiote.h": "c",
         "nrf_gpio.h": "c",
         "nordic_common.h": "c",
-        "user_uart.h": "c"
+        "user_uart.h": "c",
+        "user_ble.h": "c",
+        "ble.h": "c",
+        "ble_gap.h": "c"
     },
     "files.encoding": "utf8",
     "files.exclude": {
