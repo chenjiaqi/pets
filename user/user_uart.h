@@ -1,5 +1,5 @@
 /*
- * @File undefined 
+ * @File user_uart.h 
  * @Author: chenjiaqi@druid 
  * @Date: 2017-10-24 16:07:39 
  * @Last Modified by: chenjiaqi@druid
@@ -13,9 +13,9 @@
 #define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
 #include <stdint.h>
 
-void user_uart_test(void);
-void user_uart_init(void);
-uint32_t user_uart_close(void);
+void user_uart_test(void);              /** < User test function> */ 
+void user_uart_init(void);              /** < User uart init > */
+uint32_t user_uart_close(void);         /** < Close user uart> */
 uint32_t user_uart_puts(const uint8_t *p_data, uint32_t length);
 
 #endif // !USER_UART_H
