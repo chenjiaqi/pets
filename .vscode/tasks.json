@@ -1,0 +1,16 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "taskName": "test",
+            "command": "D:\\MinGW\\bin\\mingw32-make.exe -f ${workspaceRoot}\\project\\Makefile",
+            "type": "shell",
+            "args": [
+                "reset"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}
