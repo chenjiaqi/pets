@@ -41,6 +41,8 @@
 #include "nrf_drv_gpiote.h"
 #include "user_log.h"
 #include "user_uart.h"
+#include "nrf_log.h"
+#include "user_ble.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT 0                                           /**< Include the service_changed characteristic. If not enabled, the server's database cannot be changed for the lifetime of the device. */
 
@@ -449,38 +451,10 @@ void bsp_event_handler(bsp_event_t event)
             }
             break;
         case BSP_EVENT_KEY_1:
-            printf("key 1 \r\n");
-            static int i;
-            static char device_name[20];
-            ble_gap_conn_sec_mode_t sec_mode;
-            BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
-            sprintf(device_name,"123456789012345678901234567890",i);
-            err_code = sd_ble_gap_device_name_set(&sec_mode,
-                (const uint8_t *) device_name,
-                strlen(device_name));
-            APP_ERROR_CHECK(err_code);
-            advertising_init();
-            printf("%s\r\n",device_name);
-            //ble_advertising_start(BLE_ADV_MODE_FAST);
-            i++;
-
-
+            LOG_PROC("info", "key 1 pressed");
             break;
         case BSP_EVENT_KEY_2:
-                printf("key 2 \r\n");
-                nrf_gpio_pin_clear(LED_4);
-                static int j;
-                if(j %2)
-                {
-                    nrf_gpio_pin_clear(22);
-                    printf("low\r\n");
-                }
-                else{
-                    nrf_gpio_pin_set(22);
-                    printf("high\r\n");
-                }
-                j++;
-
+            break;
         default:
             break;
     }
@@ -533,7 +507,6 @@ void uart_event_handle(app_uart_evt_t * p_event)
 }
 /**@snippet [Handling the data received over UART] */
 
-
 /**@brief  Function for initializing the UART module.
  */
 /**@snippet [UART Initialization] */
@@ -560,6 +533,7 @@ static void uart_init(void)
     APP_ERROR_CHECK(err_code);
 }
 /**@snippet [UART Initialization] */
+
 
 
 /**@brief Function for initializing the Advertising functionality.
@@ -631,14 +605,16 @@ int main(void)
 
     // Initialize.
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
-    //uart_init();
+//    uart_init();
     user_uart_init();
     nrf_drv_gpiote_init();
 
     buttons_leds_init(&erase_bonds);
     ble_stack_init();
-    gap_params_init();
+//    gap_params_init();
+    user_ble_gap_init();
     services_init();
+    user_ble_service_init();
     advertising_init();
     conn_params_init();
     
@@ -646,15 +622,12 @@ int main(void)
     nrf_gpio_pin_set(23);
     //nrf_gpio_pin_clear(23);
 
-    printf("\r\nUART Start!\r\n");
-    printf("chenjiaqi\r\n");
+    LOG_PROC("info","PETS START!");
     LOG_PROC("info","hello world");
     
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
 
-    char data[] = "hello world\r\n";
-    user_uart_puts((uint8_t *)data,14);
     // Enter main loop.
 
     for (;;)

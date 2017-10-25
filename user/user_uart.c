@@ -13,6 +13,7 @@
 #include "app_error.h"
 #include "nrf.h"
 #include "bsp.h"
+#include "user_log.h"
 
 void user_uart_test()
 {
@@ -29,17 +30,21 @@ void user_uart_test()
 
 static void uart_event_handle(app_uart_evt_t * p_event)
 {
-//    static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
-//    static uint8_t index = 0;
+    static uint8_t data_array[10];
+    static uint8_t index = 0;
 //    uint32_t       err_code;
 
     switch (p_event->evt_type)
     {
         case APP_UART_DATA_READY:
-/*
             UNUSED_VARIABLE(app_uart_get(&data_array[index]));
+            LOG_PROC("uart recv:","%x",data_array[index]);
             index++;
+            if(index == 10)
+                index = 0;
 
+
+/*
             if ((data_array[index - 1] == '\n') || (index >= (BLE_NUS_MAX_DATA_LEN)))
             {
                 err_code = ble_nus_string_send(&m_nus, data_array, index);
