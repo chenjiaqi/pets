@@ -12,7 +12,12 @@
         "user_uart.h": "c",
         "user_ble.h": "c",
         "ble.h": "c",
-        "ble_gap.h": "c"
+        "ble_gap.h": "c",
+        "user_ble_device_manages.h": "c",
+        "nrf_log.h": "c",
+        "ble_srv_common.h": "c",
+        "user_ble_srv_common.h": "c",
+        "user_log.h": "c"
     },
     "files.encoding": "utf8",
     "files.exclude": {

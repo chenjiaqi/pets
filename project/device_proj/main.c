@@ -43,6 +43,7 @@
 #include "user_uart.h"
 #include "nrf_log.h"
 #include "user_ble.h"
+#include "user_ble_device_manages.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT 0                                           /**< Include the service_changed characteristic. If not enabled, the server's database cannot be changed for the lifetime of the device. */
 
@@ -55,7 +56,7 @@
 #define CENTRAL_LINK_COUNT              0                                           /**< Number of central links used by the application. When changing this number remember to adjust the RAM settings*/
 #define PERIPHERAL_LINK_COUNT           1                                           /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
 
-#define DEVICE_NAME                     "Nordic_UART"                               /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "DRUID_FFFFFFFFFFFF"                               /**< Name of device. Will be included in the advertising data. */
 #define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
 #define APP_ADV_INTERVAL                64                                          /**< The advertising interval (in units of 0.625 ms. This value corresponds to 40 ms). */
@@ -77,11 +78,12 @@
 #define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
 #define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
 
+
 static ble_nus_t                        m_nus;                                      /**< Structure to identify the Nordic UART Service. */
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
 
-static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE}};  /**< Universally unique service identifier. */
-
+//static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE}};  /**< Universally unique service identifier. */
+static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE},{0xff77,0x01}};  /**< Universally unique service identifier. */
 
 
 /**@brief Function for assert macro callback.
@@ -155,16 +157,25 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
 
 /**@brief Function for initializing services that will be used by the application.
  */
+
+static user_ble_device_manage_t m_device_manager;
+
 static void services_init(void)
 {
     uint32_t       err_code;
     ble_nus_init_t nus_init;
+    user_ble_device_manage_init_t device_manage_init;
 
     memset(&nus_init, 0, sizeof(nus_init));
 
     nus_init.data_handler = nus_data_handler;
 
     err_code = ble_nus_init(&m_nus, &nus_init);
+    APP_ERROR_CHECK(err_code);
+
+    /** <initial user ble device manage services> */
+    memset(&device_manage_init, 0, sizeof(device_manage_init));
+    err_code = user_ble_device_manage_init(&m_device_manager, &device_manage_init);
     APP_ERROR_CHECK(err_code);
 }
 
@@ -609,7 +620,6 @@ int main(void)
 //    uart_init();
     user_uart_init();
     nrf_drv_gpiote_init();
-
     buttons_leds_init(&erase_bonds);
     ble_stack_init();
 //    gap_params_init();
@@ -623,7 +633,7 @@ int main(void)
     nrf_gpio_pin_set(23);
     //nrf_gpio_pin_clear(23);
 
-    LOG_PROC("info","PETS START!");
+    LOG_PROC("info","PETS_PROJ START!");
     LOG_PROC("info","hello world");
     
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
