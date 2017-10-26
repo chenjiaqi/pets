@@ -43,7 +43,7 @@ SRC_FILES += \
 INC_FOLDERS += \
   $(PROJ_DIR)/../config \
   $(PROJ_DIR)/../LOG \
-  $(SDK_ROOT)/user_ble_services\user_ble_device_manage \
+  $(SDK_ROOT)/user_ble_services/user_ble_device_manage \
   $(SDK_ROOT)/user_ble_services \
   $(SDK_ROOT)/user \
   $(SDK_ROOT)/components/drivers_nrf/comp \

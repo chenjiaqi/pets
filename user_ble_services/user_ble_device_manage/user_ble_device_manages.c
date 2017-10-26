@@ -10,7 +10,6 @@
 static uint32_t device_manage_temperature_char_add(user_ble_device_manage_t *p_device_manage,
     const user_ble_device_manage_init_t* p_device_manage_init)
 {
-    uint32_t err_code;
     ble_gatts_char_md_t char_md;
     ble_gatts_attr_t    attr_char_value;
     ble_uuid_t          ble_uuid;
@@ -76,10 +75,6 @@ uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
     {
         return err_code;
     }
-
-
-
-
     return NRF_SUCCESS;
 }
 

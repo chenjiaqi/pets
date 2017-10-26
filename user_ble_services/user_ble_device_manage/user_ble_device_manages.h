@@ -22,7 +22,9 @@
  * @retval
  *
  */
+
 typedef struct user_ble_device_manage_s user_ble_device_manage_t;
+//typedef void (*user_ble_device_manage_evt_handler_t) (user_ble_device_manage_t* p_device_manage, user_ble_device_manage_init_t* p_device_manage_init);
 
 
 typedef struct 
@@ -30,12 +32,14 @@ typedef struct
     int initial;
 }user_ble_device_manage_init_t;
 
-
 struct user_ble_device_manage_s
 {
-    uint16_t service_handle;
+    uint16_t                    service_handle;
+    ble_gatts_char_handles_t    temperature_handle;
+    ble_gatts_char_handles_t    humidity_level_handle;
+    ble_gatts_char_handles_t    time_stamp;
+    uint16_t                    conn_handle;
 };
-
 
 uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
                                     const user_ble_device_manage_init_t* p_manage);
