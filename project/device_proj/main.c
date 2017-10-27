@@ -44,6 +44,8 @@
 #include "nrf_log.h"
 #include "user_ble.h"
 #include "user_ble_device_manages.h"
+#include "user_ble_srv_common.h"
+#include "user_app.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT 0                                           /**< Include the service_changed characteristic. If not enabled, the server's database cannot be changed for the lifetime of the device. */
 
@@ -56,11 +58,11 @@
 #define CENTRAL_LINK_COUNT              0                                           /**< Number of central links used by the application. When changing this number remember to adjust the RAM settings*/
 #define PERIPHERAL_LINK_COUNT           1                                           /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
 
-#define DEVICE_NAME                     "DRUID_FFFFFFFFFFFF"                               /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "DRUID_AAAAAAAAAAAA"                               /**< Name of device. Will be included in the advertising data. */
 #define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
-#define APP_ADV_INTERVAL                64                                          /**< The advertising interval (in units of 0.625 ms. This value corresponds to 40 ms). */
-#define APP_ADV_TIMEOUT_IN_SECONDS      180                                         /**< The advertising timeout (in units of seconds). */
+#define APP_ADV_INTERVAL                1600                                          /**< The advertising interval (in units of 0.625 ms. This value corresponds to 40 ms). */
+#define APP_ADV_TIMEOUT_IN_SECONDS      0                                         /**< The advertising timeout (in units of seconds). */
 
 #define APP_TIMER_PRESCALER             0                                           /**< Value of the RTC1 PRESCALER register. */
 #define APP_TIMER_OP_QUEUE_SIZE         4                                           /**< Size of timer operation queues. */
@@ -83,7 +85,7 @@ static ble_nus_t                        m_nus;                                  
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
 
 //static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE}};  /**< Universally unique service identifier. */
-static ble_uuid_t                       m_adv_uuids[] = {{BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE},{0xff77,0x01}};  /**< Universally unique service identifier. */
+static ble_uuid_t                       m_adv_uuids[] = {{USER_BLE_UUID_DEVICE_MANAGE_SERVICE,0x01}};  /**< Universally unique service identifier. */
 
 
 /**@brief Function for assert macro callback.
@@ -152,6 +154,7 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
     while (app_uart_put('\r') != NRF_SUCCESS);
     while (app_uart_put('\n') != NRF_SUCCESS);
 }
+
 /**@snippet [Handling the data received over BLE] */
 
 
@@ -159,6 +162,20 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
  */
 
 static user_ble_device_manage_t m_device_manager;
+
+static void user_ble_device_manage_data_handler(user_ble_device_manage_t *p_device_manage, uint8_t *p_data, uint16_t length)
+{
+    LOG_PROC("info","this is call back, %d", p_data[0]);
+    if (p_data[0] == 0)
+    {
+        nrf_gpio_pin_set(29);
+    }
+    else
+    {
+        nrf_gpio_pin_clear(29);
+    }
+}
+
 
 static void services_init(void)
 {
@@ -170,11 +187,13 @@ static void services_init(void)
 
     nus_init.data_handler = nus_data_handler;
 
-    err_code = ble_nus_init(&m_nus, &nus_init);
+    err_code = NRF_SUCCESS;
+//    err_code = ble_nus_init(&m_nus, &nus_init);
     APP_ERROR_CHECK(err_code);
 
     /** <initial user ble device manage services> */
     memset(&device_manage_init, 0, sizeof(device_manage_init));
+    m_device_manager.data_handler = user_ble_device_manage_data_handler;
     err_code = user_ble_device_manage_init(&m_device_manager, &device_manage_init);
     APP_ERROR_CHECK(err_code);
 }
@@ -264,6 +283,7 @@ static void sleep_mode_enter(void)
 static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 {
     uint32_t err_code;
+    LOG_PROC("ADV_EVENT","EVENT");
     switch (ble_adv_evt)
     {
         case BLE_ADV_EVT_FAST:
@@ -271,6 +291,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
             APP_ERROR_CHECK(err_code);
             break;
         case BLE_ADV_EVT_IDLE:
+            LOG_PROC("SLEEP","ENTER SLEEP MODE");
             sleep_mode_enter();
             break;
         default:
@@ -388,10 +409,10 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
     ble_conn_params_on_ble_evt(p_ble_evt);
     ble_nus_on_ble_evt(&m_nus, p_ble_evt);
+    user_ble_device_manage_on_ble_event(&m_device_manager,p_ble_evt);
     on_ble_evt(p_ble_evt);
     ble_advertising_on_ble_evt(p_ble_evt);
     bsp_btn_ble_on_ble_evt(p_ble_evt);
-
 }
 
 
@@ -441,6 +462,7 @@ void bsp_event_handler(bsp_event_t event)
     switch (event)
     {
         case BSP_EVENT_SLEEP:
+            LOG_PROC("EVENT","SLEEP ENTER");
             sleep_mode_enter();
             break;
 
@@ -464,6 +486,7 @@ void bsp_event_handler(bsp_event_t event)
             break;
         case BSP_EVENT_KEY_1:
             LOG_PROC("info", "key 1 pressed");
+            sleep_mode_enter();
             break;
         case BSP_EVENT_KEY_2:
             break;
@@ -561,7 +584,9 @@ static void advertising_init(void)
     memset(&advdata, 0, sizeof(advdata));
     advdata.name_type          = BLE_ADVDATA_FULL_NAME;
     advdata.include_appearance = false;
-    advdata.flags              = BLE_GAP_ADV_FLAGS_LE_ONLY_LIMITED_DISC_MODE;
+
+    //advdata.flags              = BLE_GAP_ADV_FLAGS_LE_ONLY_LIMITED_DISC_MODE;
+    advdata.flags              = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 
     memset(&scanrsp, 0, sizeof(scanrsp));
     scanrsp.uuids_complete.uuid_cnt = sizeof(m_adv_uuids) / sizeof(m_adv_uuids[0]);
@@ -618,19 +643,21 @@ int main(void)
     // Initialize.
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
 //    uart_init();
-    user_uart_init();
-    nrf_drv_gpiote_init();
+    
+//    user_uart_init();
+    //nrf_drv_gpiote_init();
     buttons_leds_init(&erase_bonds);
+    user_app_init();
     ble_stack_init();
-//    gap_params_init();
-    user_ble_gap_init();
+    gap_params_init();
+//    user_ble_gap_init();
     services_init();
-    user_ble_service_init();
+//    user_ble_service_init();
     advertising_init();
     conn_params_init();
     
-    nrf_gpio_cfg_output(23);
-    nrf_gpio_pin_set(23);
+    nrf_gpio_cfg_output(29);
+    nrf_gpio_pin_clear(29);
     //nrf_gpio_pin_clear(23);
 
     LOG_PROC("info","PETS_PROJ START!");

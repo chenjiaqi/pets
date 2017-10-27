@@ -22,7 +22,7 @@
 #include "bsp_btn_ble.h"
 #include "user_log.h"
 
-#define DEVICE_NAME                     "Nordic_CCCCCCC"                                /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "DRUID_AABBCCDDEEFF"                                /**< Name of device. Will be included in the advertising data. */
 #define MIN_CONN_INTERVAL               MSEC_TO_UNITS(20, UNIT_1_25_MS)             /**< Minimum acceptable connection interval (20 ms), Connection interval uses 1.25 ms units. */
 #define MAX_CONN_INTERVAL               MSEC_TO_UNITS(75, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (75 ms), Connection interval uses 1.25 ms units. */
 #define SLAVE_LATENCY                   0                                           /**< Slave latency. */

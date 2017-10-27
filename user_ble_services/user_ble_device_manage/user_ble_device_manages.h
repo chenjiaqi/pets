@@ -25,6 +25,7 @@
 
 typedef struct user_ble_device_manage_s user_ble_device_manage_t;
 //typedef void (*user_ble_device_manage_evt_handler_t) (user_ble_device_manage_t* p_device_manage, user_ble_device_manage_init_t* p_device_manage_init);
+typedef void (*user_ble_device_manage_data_handler_t) (user_ble_device_manage_t *p_device_manage, uint8_t *p_data, uint16_t length);
 
 
 typedef struct 
@@ -39,8 +40,11 @@ struct user_ble_device_manage_s
     ble_gatts_char_handles_t    humidity_level_handle;
     ble_gatts_char_handles_t    time_stamp;
     uint16_t                    conn_handle;
+    user_ble_device_manage_data_handler_t data_handler;
 };
 
 uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
                                     const user_ble_device_manage_init_t* p_manage);
+
+void user_ble_device_manage_on_ble_event(user_ble_device_manage_t *p_dev_manage, ble_evt_t * p_ble_evt);
 #endif

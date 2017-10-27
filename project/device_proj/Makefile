@@ -30,6 +30,7 @@ SRC_FILES += \
   $(PROJ_DIR)/../bsp/bsp.c \
   $(PROJ_DIR)/../bsp/bsp_btn_ble.c \
   $(PROJ_DIR)/main.c \
+  $(PROJ_DIR)/user_app.c \
   $(SDK_ROOT)/components/ble/common/ble_advdata.c \
   $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \
   $(SDK_ROOT)/components/ble/common/ble_conn_params.c \
@@ -139,7 +140,7 @@ LIB_FILES += \
 
 # C flags common to all targets
 CFLAGS += -DNRF52
-CFLAGS += -DDEBUG_MODE
+#CFLAGS += -DDEBUG_MODE
 CFLAGS += -DBOARD_PCA10040
 CFLAGS += -DNRF52832
 CFLAGS += -DNRF52_PAN_64
