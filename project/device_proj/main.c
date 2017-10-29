@@ -168,11 +168,11 @@ static void user_ble_device_manage_data_handler(user_ble_device_manage_t *p_devi
     LOG_PROC("info","this is call back, %d", p_data[0]);
     if (p_data[0] == 0)
     {
-        nrf_gpio_pin_set(29);
+        nrf_gpio_pin_set(LED_4);
     }
     else
     {
-        nrf_gpio_pin_clear(29);
+        nrf_gpio_pin_clear(LED_4);
     }
 }
 
@@ -226,6 +226,7 @@ static void on_conn_params_evt(ble_conn_params_evt_t * p_evt)
  *
  * @param[in] nrf_error  Error code containing information about what went wrong.
  */
+
 static void conn_params_error_handler(uint32_t nrf_error)
 {
     APP_ERROR_HANDLER(nrf_error);
@@ -648,23 +649,23 @@ int main(void)
     //nrf_drv_gpiote_init();
     buttons_leds_init(&erase_bonds);
     user_app_init();
-    ble_stack_init();
-    gap_params_init();
+    //ble_stack_init();
+//    gap_params_init();
 //    user_ble_gap_init();
-    services_init();
+//    services_init();
 //    user_ble_service_init();
-    advertising_init();
-    conn_params_init();
+//    advertising_init();
+//    conn_params_init();
     
-    nrf_gpio_cfg_output(29);
-    nrf_gpio_pin_clear(29);
+    nrf_gpio_cfg_output(LED_4);
+    nrf_gpio_pin_clear(LED_4);
     //nrf_gpio_pin_clear(23);
 
     LOG_PROC("info","PETS_PROJ START!");
     LOG_PROC("info","hello world");
     
-    err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
-    APP_ERROR_CHECK(err_code);
+//    err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
+//    APP_ERROR_CHECK(err_code);
 
     // Enter main loop.
 

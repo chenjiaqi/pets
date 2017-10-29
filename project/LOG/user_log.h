@@ -6,7 +6,7 @@
 #define LOG_PROC(log_level, format, arguments...) \
     printf("[%s] ", log_level);    \
     printf(format, ##arguments);    \
-    printf("\n");
+    printf("\r\n");
 #else
     #define LOG_PROC(log_level, format, arguments...) 
 #endif
