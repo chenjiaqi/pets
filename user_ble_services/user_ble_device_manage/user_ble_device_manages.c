@@ -11,6 +11,16 @@ static void on_write(user_ble_device_manage_t *p_device_manage, ble_evt_t *p_ble
     ble_gatts_evt_write_t * p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
     p_device_manage->data_handler(p_device_manage, p_evt_write->data, p_evt_write->len);
     LOG_PROC("onwrite","%d", (p_evt_write->data)[0]);
+
+    if (ble_srv_is_notification_enabled(p_evt_write->data))
+    {
+        LOG_EVENT("On Write");
+        p_device_manage->is_com_rsp_notification_enable = true;
+    }
+    else
+    {
+        p_device_manage->is_com_rsp_notification_enable = false;
+    }
 }
 
 static void on_connect(user_ble_device_manage_t *p_device_manage, ble_evt_t *p_ble_evt)
@@ -44,6 +54,7 @@ static uint32_t device_manage_temperature_char_add(user_ble_device_manage_t *p_d
     char_md.p_user_desc_md = NULL;
     char_md.p_cccd_md = NULL;
     char_md.p_sccd_md = NULL;
+
 
     BLE_UUID_BLE_ASSIGN(ble_uuid, USER_BLE_UUID_DEVICE_TEMPERATURE_CHAR);
 
@@ -116,6 +127,7 @@ static uint32_t device_manage_humidity_char_add(user_ble_device_manage_t *p_devi
                                             &p_device_manage->humidity_level_handle);
 }
 
+
 static uint32_t device_manage_led_char_add(user_ble_device_manage_t *p_device_manage,
     const user_ble_device_manage_init_t* p_device_manage_init)
 {
@@ -161,6 +173,59 @@ static uint32_t device_manage_led_char_add(user_ble_device_manage_t *p_device_ma
                                             &p_device_manage->led_handle);
 }
 
+static uint32_t device_manage_cmd_rsp_char_add(user_ble_device_manage_t *p_device_manage,
+    const user_ble_device_manage_init_t* p_device_manage_init)
+{
+    ble_gatts_char_md_t char_md;
+    ble_gatts_attr_md_t cccd_md;
+    ble_gatts_attr_t    attr_char_value;
+    ble_uuid_t          ble_uuid;
+    ble_gatts_attr_md_t attr_md;
+
+    memset(&cccd_md, 0, sizeof(cccd_md));
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
+    cccd_md.vloc = BLE_GATTS_VLOC_STACK;
+
+
+    memset(&char_md, 0, sizeof(char_md));
+    uint8_t init_value_encode[] = {61,62,63,64,65};
+
+    //char_md.char_props.read = 1;
+    //char_md.char_props.write = 1;
+    char_md.char_props.notify = 1;
+    char_md.p_char_user_desc = NULL; 
+    char_md.p_char_pf = NULL;
+    char_md.p_user_desc_md = NULL;
+    char_md.p_cccd_md = &cccd_md;
+    char_md.p_sccd_md = NULL;
+
+    BLE_UUID_BLE_ASSIGN(ble_uuid, USER_BLE_UUID_DEVICE_CMD_RSP_CHAR);
+
+    memset(&attr_md, 0, sizeof(attr_md));
+
+    attr_md.vloc = BLE_GATTS_VLOC_STACK;
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
+    attr_md.rd_auth = 0;
+    attr_md.wr_auth = 0;
+    attr_md.vlen = 1;
+
+    memset(&attr_char_value, 0, sizeof(attr_char_value));
+
+    attr_char_value.p_uuid = &ble_uuid;
+    attr_char_value.p_attr_md = &attr_md;
+    attr_char_value.init_len = sizeof(uint8_t);
+    attr_char_value.init_offs = 0;
+    attr_char_value.max_len = 5 * sizeof(uint8_t);
+    attr_char_value.p_value = (uint8_t *)init_value_encode;
+
+    return sd_ble_gatts_characteristic_add(p_device_manage->service_handle,
+                                            &char_md,
+                                            &attr_char_value,
+                                            &p_device_manage->cmd_rsp_handle);
+}
+
 
 uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
                                 const user_ble_device_manage_init_t* p_device_manage_init)
@@ -175,7 +240,7 @@ uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
     &ble_uuid, &(p_device_manage->service_handle));
     if (err_code != NRF_SUCCESS)
     {
-        LOG_PROC("ERROR","%x",err_code);
+        LOG_PROC("ERROR","%x",LOG_UINT(err_code));
         return err_code;
     }
 
@@ -183,21 +248,28 @@ uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
     err_code = device_manage_temperature_char_add(p_device_manage, p_device_manage_init);
     if(err_code != NRF_SUCCESS)
     {
-        LOG_PROC("ERROR","%x",err_code);
+        LOG_PROC("ERROR","%x",LOG_UINT(err_code));
         return err_code;
     }
 
     err_code = device_manage_humidity_char_add(p_device_manage, p_device_manage_init);
     if(err_code != NRF_SUCCESS)
     {
-        LOG_PROC("ERROR","%x",err_code);
+        LOG_PROC("ERROR","%x",LOG_UINT(err_code));
         return err_code;
     }
 
     err_code = device_manage_led_char_add(p_device_manage, p_device_manage_init);
     if(err_code != NRF_SUCCESS)
     {
-        LOG_PROC("ERROR","%x",err_code);
+        LOG_PROC("ERROR","%x",LOG_UINT(err_code));
+        return err_code;
+    }
+
+    err_code = device_manage_cmd_rsp_char_add(p_device_manage, p_device_manage_init);
+    if(err_code != NRF_SUCCESS)
+    {
+        LOG_PROC("ERROR","%x",LOG_UINT(err_code));
         return err_code;
     }
 
@@ -273,4 +345,24 @@ uint32_t user_ble_temp_humidity_update(user_ble_device_manage_t *p_device_manage
     }
     return err_code;
 
+}
+
+uint32_t user_ble_device_manage_cmd_rsp_send(user_ble_device_manage_t *p_device_manage,
+                                             uint8_t *p_string, uint16_t length)
+{
+    LOG_INFO("Cmd resp");
+    ble_gatts_hvx_params_t hvx_params;
+    if ((p_device_manage->conn_handle == BLE_CONN_HANDLE_INVALID))
+    {
+        return NRF_ERROR_INVALID_STATE;
+    }
+
+    if (length > BLE_DEVICE_MANAGE_MAX_DATA_LEN)
+    {
+        return NRF_ERROR_INVALID_PARAM;
+    }
+
+
+
+    return NRF_SUCCESS;
 }
