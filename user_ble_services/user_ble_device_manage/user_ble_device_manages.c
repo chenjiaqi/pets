@@ -16,6 +16,7 @@ static void on_write(user_ble_device_manage_t *p_device_manage, ble_evt_t *p_ble
 static void on_connect(user_ble_device_manage_t *p_device_manage, ble_evt_t *p_ble_evt)
 {
     p_device_manage->conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+    LOG_PROC("CONNECT","%d",p_device_manage->conn_handle);
 }
 
 static void on_disconnect(user_ble_device_manage_t * p_device_manage, ble_evt_t * p_ble_evt)
@@ -166,7 +167,6 @@ uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
 {
     uint32_t err_code;
     ble_uuid_t ble_uuid;
-    LOG_PROC("DEBUG","user_ble_device_manage_init");
 
     // ADD Services
     BLE_UUID_BLE_ASSIGN(ble_uuid,USER_BLE_UUID_DEVICE_MANAGE_SERVICE);
@@ -175,6 +175,7 @@ uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
     &ble_uuid, &(p_device_manage->service_handle));
     if (err_code != NRF_SUCCESS)
     {
+        LOG_PROC("ERROR","%x",err_code);
         return err_code;
     }
 
@@ -182,20 +183,24 @@ uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
     err_code = device_manage_temperature_char_add(p_device_manage, p_device_manage_init);
     if(err_code != NRF_SUCCESS)
     {
+        LOG_PROC("ERROR","%x",err_code);
         return err_code;
     }
 
     err_code = device_manage_humidity_char_add(p_device_manage, p_device_manage_init);
     if(err_code != NRF_SUCCESS)
     {
+        LOG_PROC("ERROR","%x",err_code);
         return err_code;
     }
 
     err_code = device_manage_led_char_add(p_device_manage, p_device_manage_init);
     if(err_code != NRF_SUCCESS)
     {
+        LOG_PROC("ERROR","%x",err_code);
         return err_code;
     }
+
     return NRF_SUCCESS;
 }
 
@@ -234,10 +239,9 @@ uint32_t user_ble_temp_humidity_update(user_ble_device_manage_t *p_device_manage
 {
     if(p_device_manage == NULL)
     {
+        LOG_PROC("ERROR", "p_device_mage is NULL");
         return NRF_ERROR_NULL;
     }
-    LOG_PROC("UPDATE","%d",temp);
-    LOG_PROC("UPDATE","%d",humidity);
 
     uint32_t err_code = NRF_SUCCESS;
     ble_gatts_value_t gatts_value;
@@ -246,20 +250,25 @@ uint32_t user_ble_temp_humidity_update(user_ble_device_manage_t *p_device_manage
     gatts_value.offset = 0;
     gatts_value.p_value = &temp;
     
+    //LOG_PROC("HANDLE","%d", p_device_manage->temperature_handle);
     err_code = sd_ble_gatts_value_set(BLE_CONN_HANDLE_INVALID, 
                                     p_device_manage->temperature_handle.value_handle,
                                     &gatts_value);
-    if (err_code != NRF_SUCCESS)
+    /*if (err_code != NRF_SUCCESS)
     {
         return err_code;
     }
+    */
 
+    //LOG_PROC("HANDLE","%d", p_device_manage->humidity_level_handle);
+    //LOG_PROC("HANDLE","%d", p_device_manage->led_handle);
     gatts_value.p_value = &humidity;
     err_code = sd_ble_gatts_value_set(BLE_CONN_HANDLE_INVALID, 
                                     p_device_manage->humidity_level_handle.value_handle,
                                     &gatts_value);
     if (err_code != NRF_SUCCESS)
     {
+        LOG_PROC("ERROR","sd_ble_gatts_value_set failed, err_code is %x", (unsigned int)err_code);
         return err_code;
     }
     return err_code;

@@ -10,6 +10,7 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   $(SDK_ROOT)/user/user_uart.c \
+  $(SDK_ROOT)/user/user_device_info.c \
   $(SDK_ROOT)/user_ble_services/user_ble_device_manage/user_ble_device_manages.c\
   $(SDK_ROOT)/user/user_ble.c \
   $(SDK_ROOT)/components/libraries/button/app_button.c \
@@ -32,6 +33,7 @@ SRC_FILES += \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/MyDHT11.c\
   $(PROJ_DIR)/user_app.c \
+  $(PROJ_DIR)/user_process.c \
   $(SDK_ROOT)/components/ble/common/ble_advdata.c \
   $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \
   $(SDK_ROOT)/components/ble/common/ble_conn_params.c \

@@ -8,6 +8,9 @@
 #ifndef USER_APP_H
 #define USER_APP_H
 
+#include "user_ble_device_manages.h"
+
 void user_app_init(void);
+extern user_ble_device_manage_t m_device_manager;
 
 #endif //  SERVICES_H

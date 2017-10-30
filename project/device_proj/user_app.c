@@ -24,9 +24,11 @@
 #include "user_log.h"
 #include "user_ble_srv_common.h"
 #include "app_timer.h"
+#include "user_device_info.h"
 
 user_ble_device_manage_t m_device_manager;
 
+#define DEVICE_NAME_PREX                     "DRUID_"                               /**< Name of device. Will be included in the advertising data. */
 #define DEVICE_NAME                     "DRUID_AAAAAAAAAAAA"                               /**< Name of device. Will be included in the advertising data. */
 #if (NRF_SD_BLE_API_VERSION == 3)
 #define NRF_BLE_MAX_MTU_SIZE            GATT_MTU_SIZE_DEFAULT                       /**< MTU size used in the softdevice enabling and to reply to a BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST event. */
@@ -288,9 +290,14 @@ static void gap_params_init(void)
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
 
+    uint8_t device_name_str[] = DEVICE_NAME;
+    err_code = user_get_mac_address_str((uint8_t *)(device_name_str + strlen(DEVICE_NAME_PREX)));
+
+    APP_ERROR_CHECK(err_code);
+
     err_code = sd_ble_gap_device_name_set(&sec_mode,
-                                          (const uint8_t *) DEVICE_NAME,
-                                          strlen(DEVICE_NAME));
+                                          (const uint8_t *) device_name_str,
+                                          strlen((char *)device_name_str));
     APP_ERROR_CHECK(err_code);
 
     memset(&gap_conn_params, 0, sizeof(gap_conn_params));
@@ -382,5 +389,4 @@ void user_app_init(void)
     conn_params_init();
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
-
 }

@@ -21,7 +21,14 @@
         "app_util.h": "c",
         "ble_advertising.h": "c",
         "dht11.h": "c",
-        "nrf_delay.h": "c"
+        "nrf_delay.h": "c",
+        "device_info.h": "c",
+        "mydht11.h": "c",
+        "nrf_soc.h": "c",
+        "sdk_common.h": "c",
+        "user_device_info.h": "c",
+        "user_process.h": "c"
+
     },
     "files.encoding": "utf8",
     "files.exclude": {

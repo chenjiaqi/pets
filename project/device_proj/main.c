@@ -46,6 +46,9 @@
 #include "user_ble_device_manages.h"
 #include "user_ble_srv_common.h"
 #include "user_app.h"
+#include "MyDHT11.h"
+#include "user_device_info.h"
+#include "user_process.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT 0                                           /**< Include the service_changed characteristic. If not enabled, the server's database cannot be changed for the lifetime of the device. */
 
@@ -161,7 +164,7 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
 /**@brief Function for initializing services that will be used by the application.
  */
 
-static user_ble_device_manage_t m_device_manager;
+//static user_ble_device_manage_t m_device_manager;
 
 static void user_ble_device_manage_data_handler(user_ble_device_manage_t *p_device_manage, uint8_t *p_data, uint16_t length)
 {
@@ -487,9 +490,10 @@ void bsp_event_handler(bsp_event_t event)
             }
             break;
         case BSP_EVENT_KEY_1:
-            LOG_PROC("info", "key 1 pressed");
+            LOG_EVENT("KEY1 PRESSED");
+            //LOG_ERROR("ERROR");
             //sleep_mode_enter();
-            
+
             //start_to_read();
             is_need_read = true;
             break;
@@ -637,37 +641,34 @@ static void power_manage(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
+//extern user_ble_device_manage_t m_device_manager;
 /**@brief Application main function.
  */
 int main(void)
 {
-    uint32_t err_code;
     bool erase_bonds;
 
     // Initialize.
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
-//    uart_init();
-    
-//    user_uart_init();
+    //    uart_init();
+
+    //    user_uart_init();
     //nrf_drv_gpiote_init();
     buttons_leds_init(&erase_bonds);
     user_app_init();
     //ble_stack_init();
-//    gap_params_init();
-//    user_ble_gap_init();
-//    services_init();
-//    user_ble_service_init();
-//    advertising_init();
-//    conn_params_init();
-    
+    //    gap_params_init();
+    //    user_ble_gap_init();
+    //    services_init();
+    //    user_ble_service_init();
+    //    advertising_init();
+    //    conn_params_init();
+
     nrf_gpio_cfg_output(LED_4);
     nrf_gpio_pin_clear(LED_4);
     //nrf_gpio_pin_clear(23);
 
-    LOG_PROC("info","PETS_PROJ START!");
-    LOG_PROC("info","hello world");
-    
+    LOG_INFO("PETS_PROJ START");
 //    err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
 //    APP_ERROR_CHECK(err_code);
 
@@ -677,12 +678,31 @@ int main(void)
     {
         if(is_need_read)
         {
-            start_to_read();
+            MyDHT11 value;
+            if( start_to_read(&value)== NRF_SUCCESS)
+            {
+                LOG_PROC("INFO", "HUMIDITY:%d.%d, TEMPERTURE:%d.%d", value.humidityH, value.humidityL,
+                         value.temperatureH, value.temperatureL);
+                user_ble_temp_humidity_update(&m_device_manager, value.temperatureH, value.humidityH);
+            }
+            else
+            {
+                LOG_PROC("ERROR","read sensor error");
+            }
+
             is_need_read = false;
+
+            uint8_t addr[BLE_GAP_ADDR_LEN];
+            uint8_t addr_str[(BLE_GAP_ADDR_LEN << 1) + 1];
+            user_get_mac_address(addr);
+            LOG_INFO("%x:%x:%x:%x:%x:%x", addr[0],addr[1],addr[2],addr[3],addr[4],addr[5]);
+            user_get_mac_address_str(addr_str);
+            LOG_INFO("%s", addr_str);
         }
         power_manage();
     }
 }
+
 /**
  * @}
  */
