@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-10-27 16:53:45 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-10-27 19:08:53
+ * @Last Modified time: 2017-10-29 11:28:19
  */
 #include "user_app.h"
 #include "bsp.h"
@@ -25,7 +25,7 @@
 #include "user_ble_srv_common.h"
 #include "app_timer.h"
 
-static user_ble_device_manage_t m_device_manager;
+user_ble_device_manage_t m_device_manager;
 
 #define DEVICE_NAME                     "DRUID_AAAAAAAAAAAA"                               /**< Name of device. Will be included in the advertising data. */
 #if (NRF_SD_BLE_API_VERSION == 3)

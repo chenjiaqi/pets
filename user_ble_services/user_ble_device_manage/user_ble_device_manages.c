@@ -13,6 +13,18 @@ static void on_write(user_ble_device_manage_t *p_device_manage, ble_evt_t *p_ble
     LOG_PROC("onwrite","%d", (p_evt_write->data)[0]);
 }
 
+static void on_connect(user_ble_device_manage_t *p_device_manage, ble_evt_t *p_ble_evt)
+{
+    p_device_manage->conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+}
+
+static void on_disconnect(user_ble_device_manage_t * p_device_manage, ble_evt_t * p_ble_evt)
+{
+    UNUSED_PARAMETER(p_ble_evt);
+    p_device_manage->conn_handle = BLE_CONN_HANDLE_INVALID;
+}
+
+
 static uint32_t device_manage_temperature_char_add(user_ble_device_manage_t *p_device_manage,
     const user_ble_device_manage_init_t* p_device_manage_init)
 {
@@ -100,7 +112,7 @@ static uint32_t device_manage_humidity_char_add(user_ble_device_manage_t *p_devi
     return sd_ble_gatts_characteristic_add(p_device_manage->service_handle,
                                             &char_md,
                                             &attr_char_value,
-                                            &p_device_manage->temperature_handle);
+                                            &p_device_manage->humidity_level_handle);
 }
 
 static uint32_t device_manage_led_char_add(user_ble_device_manage_t *p_device_manage,
@@ -145,7 +157,7 @@ static uint32_t device_manage_led_char_add(user_ble_device_manage_t *p_device_ma
     return sd_ble_gatts_characteristic_add(p_device_manage->service_handle,
                                             &char_md,
                                             &attr_char_value,
-                                            &p_device_manage->temperature_handle);
+                                            &p_device_manage->led_handle);
 }
 
 
@@ -189,7 +201,6 @@ uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
 
 void user_ble_device_manage_on_ble_event(user_ble_device_manage_t *p_dev_manage,ble_evt_t * p_ble_evt)
 {
-    LOG_PROC("FUNCTON","device manage on ble event");
     if (p_ble_evt == NULL)
     {
         return;
@@ -197,6 +208,15 @@ void user_ble_device_manage_on_ble_event(user_ble_device_manage_t *p_dev_manage,
 
     switch (p_ble_evt->header.evt_id)
     {
+        case BLE_GAP_EVT_CONNECTED:
+            LOG_PROC("EVENT","BLE_GAP_EVT_CONNECTED");
+            on_connect(p_dev_manage,p_ble_evt);
+            break;
+        case BLE_GAP_EVT_DISCONNECTED:
+            LOG_PROC("EVENT","BLE_GAP_EVT_CONNECTED");
+            on_disconnect(p_dev_manage,p_ble_evt);
+            break;
+
         case BLE_GATTS_EVT_WRITE:
             LOG_PROC("EVENT","BLE_GATTS_EVT_WRITE");
             LOG_PROC("EVENT","%d", p_ble_evt->evt.gatts_evt.params.write.handle);
@@ -208,4 +228,40 @@ void user_ble_device_manage_on_ble_event(user_ble_device_manage_t *p_dev_manage,
         default:
             break;
     }
+}
+
+uint32_t user_ble_temp_humidity_update(user_ble_device_manage_t *p_device_manage, uint8_t temp, uint8_t humidity)
+{
+    if(p_device_manage == NULL)
+    {
+        return NRF_ERROR_NULL;
+    }
+    LOG_PROC("UPDATE","%d",temp);
+    LOG_PROC("UPDATE","%d",humidity);
+
+    uint32_t err_code = NRF_SUCCESS;
+    ble_gatts_value_t gatts_value;
+    memset(&gatts_value, 0, sizeof(gatts_value));
+    gatts_value.len = sizeof(uint8_t);
+    gatts_value.offset = 0;
+    gatts_value.p_value = &temp;
+    
+    err_code = sd_ble_gatts_value_set(BLE_CONN_HANDLE_INVALID, 
+                                    p_device_manage->temperature_handle.value_handle,
+                                    &gatts_value);
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
+
+    gatts_value.p_value = &humidity;
+    err_code = sd_ble_gatts_value_set(BLE_CONN_HANDLE_INVALID, 
+                                    p_device_manage->humidity_level_handle.value_handle,
+                                    &gatts_value);
+    if (err_code != NRF_SUCCESS)
+    {
+        return err_code;
+    }
+    return err_code;
+
 }
