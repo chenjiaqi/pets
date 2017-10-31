@@ -9,17 +9,25 @@
 static void on_write(user_ble_device_manage_t *p_device_manage, ble_evt_t *p_ble_evt)
 {
     ble_gatts_evt_write_t * p_evt_write = &p_ble_evt->evt.gatts_evt.params.write;
-    p_device_manage->data_handler(p_device_manage, p_evt_write->data, p_evt_write->len);
-    LOG_PROC("onwrite","%d", (p_evt_write->data)[0]);
+    
 
-    if (ble_srv_is_notification_enabled(p_evt_write->data))
+    if (p_evt_write->handle == p_device_manage->cmd_rsp_handle.cccd_handle)
     {
-        LOG_EVENT("On Write");
-        p_device_manage->is_com_rsp_notification_enable = true;
+
+        if (ble_srv_is_notification_enabled(p_evt_write->data))
+        {
+            LOG_EVENT("ENABLE");
+            p_device_manage->is_com_rsp_notification_enable = true;
+        }
+        else
+        {
+            LOG_EVENT("DISABLE");
+            p_device_manage->is_com_rsp_notification_enable = false;
+        }
     }
-    else
+    else if (p_evt_write->handle == p_device_manage->led_handle.value_handle)
     {
-        p_device_manage->is_com_rsp_notification_enable = false;
+        p_device_manage->data_handler(p_device_manage, p_evt_write->data, p_evt_write->len);
     }
 }
 
@@ -189,7 +197,6 @@ static uint32_t device_manage_cmd_rsp_char_add(user_ble_device_manage_t *p_devic
 
 
     memset(&char_md, 0, sizeof(char_md));
-    uint8_t init_value_encode[] = {61,62,63,64,65};
 
     //char_md.char_props.read = 1;
     //char_md.char_props.write = 1;
@@ -218,7 +225,7 @@ static uint32_t device_manage_cmd_rsp_char_add(user_ble_device_manage_t *p_devic
     attr_char_value.init_len = sizeof(uint8_t);
     attr_char_value.init_offs = 0;
     attr_char_value.max_len = 5 * sizeof(uint8_t);
-    attr_char_value.p_value = (uint8_t *)init_value_encode;
+    //attr_char_value.p_value = (uint8_t *)init_value_encode;
 
     return sd_ble_gatts_characteristic_add(p_device_manage->service_handle,
                                             &char_md,
@@ -296,7 +303,7 @@ void user_ble_device_manage_on_ble_event(user_ble_device_manage_t *p_dev_manage,
 
         case BLE_GATTS_EVT_WRITE:
             LOG_PROC("EVENT","BLE_GATTS_EVT_WRITE");
-            LOG_PROC("EVENT","%d", p_ble_evt->evt.gatts_evt.params.write.handle);
+            //LOG_PROC("EVENT","%d", p_ble_evt->evt.gatts_evt.params.write.handle);
             on_write(p_dev_manage, p_ble_evt);
             break;
         case BLE_GATTS_EVT_HVC:
@@ -350,9 +357,8 @@ uint32_t user_ble_temp_humidity_update(user_ble_device_manage_t *p_device_manage
 uint32_t user_ble_device_manage_cmd_rsp_send(user_ble_device_manage_t *p_device_manage,
                                              uint8_t *p_string, uint16_t length)
 {
-    LOG_INFO("Cmd resp");
     ble_gatts_hvx_params_t hvx_params;
-    if ((p_device_manage->conn_handle == BLE_CONN_HANDLE_INVALID))
+    if ((p_device_manage->conn_handle == BLE_CONN_HANDLE_INVALID) || (!p_device_manage->is_com_rsp_notification_enable))
     {
         return NRF_ERROR_INVALID_STATE;
     }
@@ -362,7 +368,12 @@ uint32_t user_ble_device_manage_cmd_rsp_send(user_ble_device_manage_t *p_device_
         return NRF_ERROR_INVALID_PARAM;
     }
 
+    memset(&hvx_params, 0, sizeof(hvx_params));
 
+    hvx_params.handle = p_device_manage->cmd_rsp_handle.value_handle;
+    hvx_params.p_data = p_string;
+    hvx_params.p_len = &length;
+    hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
 
-    return NRF_SUCCESS;
+    return sd_ble_gatts_hvx(p_device_manage->conn_handle, &hvx_params);
 }

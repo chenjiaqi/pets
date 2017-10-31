@@ -63,7 +63,7 @@ uint32_t user_get_mac_address_str(uint8_t *p_addr_str)
         return err_code;
     }
     
-    LOG_INFO("%2d", sizeof(addr_str));
+    //LOG_INFO("%2d", sizeof(addr_str));
     for(int i = 0; i <BLE_GAP_ADDR_LEN; i++)
     {
         sprintf(p_addr_str + i * 2, "%02X", addr[i]);

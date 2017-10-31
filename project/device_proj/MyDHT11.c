@@ -102,7 +102,6 @@ uint32_t start_to_read(MyDHT11 *p_value)
         if(crc == com())
         {
             return NRF_SUCCESS;
-            
         }
         else
         {

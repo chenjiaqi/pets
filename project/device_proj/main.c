@@ -49,6 +49,7 @@
 #include "MyDHT11.h"
 #include "user_device_info.h"
 #include "user_process.h"
+#include "nrf_delay.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT 0                                           /**< Include the service_changed characteristic. If not enabled, the server's database cannot be changed for the lifetime of the device. */
 
@@ -679,25 +680,24 @@ int main(void)
         if(is_need_read)
         {
             MyDHT11 value;
-            if( start_to_read(&value)== NRF_SUCCESS)
+            while(start_to_read(&value) != NRF_SUCCESS)
             {
-                LOG_PROC("INFO", "HUMIDITY:%d.%d, TEMPERTURE:%d.%d", value.humidityH, value.humidityL,
-                         value.temperatureH, value.temperatureL);
-                user_ble_temp_humidity_update(&m_device_manager, value.temperatureH, value.humidityH);
-            }
-            else
-            {
-                LOG_PROC("ERROR","read sensor error");
+                nrf_delay_ms(200);
+                LOG_ERROR("RETRY");
             }
 
+            LOG_PROC("INFO", "HUMIDITY:%d.%d, TEMPERTURE:%d.%d", value.humidityH, value.humidityL,
+                         value.temperatureH, value.temperatureL);
             is_need_read = false;
 
             uint8_t addr[BLE_GAP_ADDR_LEN];
             uint8_t addr_str[(BLE_GAP_ADDR_LEN << 1) + 1];
-            user_get_mac_address(addr);
-            LOG_INFO("%x:%x:%x:%x:%x:%x", addr[0],addr[1],addr[2],addr[3],addr[4],addr[5]);
+            //user_get_mac_address(addr);
+            //LOG_INFO("%x:%x:%x:%x:%x:%x", addr[0],addr[1],addr[2],addr[3],addr[4],addr[5]);
             user_get_mac_address_str(addr_str);
             LOG_INFO("%s", addr_str);
+            user_ble_device_manage_cmd_rsp_send(&m_device_manager, addr_str, 5);
+            //nrf_delay_ms(1000);
         }
         power_manage();
     }
