@@ -25,6 +25,7 @@
 #include "user_ble_srv_common.h"
 #include "app_timer.h"
 #include "user_device_info.h"
+#include "fstorage.h"
 
 user_ble_device_manage_t m_device_manager;
 
@@ -86,8 +87,13 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
         default:
             break;
     }
-
 }
+
+static void sys_evt_dispatch(uint32_t sys_evt)
+{
+    fs_sys_event_handler(sys_evt);
+}
+
 static void uart_event_handle(app_uart_evt_t * p_event)
 {
 
@@ -244,6 +250,9 @@ static void ble_stack_init(void)
     // Subscribe for BLE events.
     err_code = softdevice_ble_evt_handler_set(ble_evt_dispatch);
     APP_ERROR_CHECK(err_code);
+
+    err_code = softdevice_sys_evt_handler_set(sys_evt_dispatch);
+    APP_ERROR_CHECK(err_code);
 }
 
 
@@ -387,6 +396,7 @@ void user_app_init(void)
     services_init();
     advertising_init();
     conn_params_init();
+    fs_init();
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
 }
