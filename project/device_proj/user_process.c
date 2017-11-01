@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-10-30 17:11:54 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-10-30 17:17:54
+ * @Last Modified time: 2017-11-01 09:42:55
  */
 #include "user_process.h"
 #include "user_log.h"
@@ -35,7 +35,7 @@ static void fs_evt_handler(fs_evt_t const * const evt, fs_ret_t result)
 FS_REGISTER_CFG(fs_config_t fs_config) =
 {
         .callback = fs_evt_handler, // Function for event callbacks.
-        .num_pages = 1,     // Number of physical flash pages required.
+        .num_pages = 1,             // Number of physical flash pages required.
         .priority = 0xFE            // Priority for flash usage.
 };
 extern void power_manage();
@@ -79,5 +79,4 @@ void user_process(void)
         current_pos++;
         is_need_write_flash = false;
     }
-
 }

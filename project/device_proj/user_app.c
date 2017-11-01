@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-10-27 16:53:45 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-10-29 11:28:19
+ * @Last Modified time: 2017-11-01 11:20:31
  */
 #include "user_app.h"
 #include "bsp.h"
@@ -30,7 +30,7 @@
 user_ble_device_manage_t m_device_manager;
 
 #define DEVICE_NAME_PREX                     "DRUID_"                               /**< Name of device. Will be included in the advertising data. */
-#define DEVICE_NAME                     "DRUID_AAAAAAAAAAAA"                               /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "DRUID_AAAAAAAAAAAA1F40"                               /**< Name of device. Will be included in the advertising data. */
 #if (NRF_SD_BLE_API_VERSION == 3)
 #define NRF_BLE_MAX_MTU_SIZE            GATT_MTU_SIZE_DEFAULT                       /**< MTU size used in the softdevice enabling and to reply to a BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST event. */
 #endif
@@ -263,11 +263,15 @@ static void user_ble_device_manage_data_handler(user_ble_device_manage_t *p_devi
     if (p_data[0] == 0)
     {
         nrf_gpio_pin_set(LED_4);
+        nrf_gpio_pin_set(29);
     }
     else
     {
         nrf_gpio_pin_clear(LED_4);
+        nrf_gpio_pin_clear(29);
     }
+    user_ble_device_manage_cmd_rsp_send(&m_device_manager,p_data, 1);
+
 }
 
 
@@ -303,6 +307,8 @@ static void gap_params_init(void)
     err_code = user_get_mac_address_str((uint8_t *)(device_name_str + strlen(DEVICE_NAME_PREX)));
 
     APP_ERROR_CHECK(err_code);
+    sprintf(device_name_str + 18,"%s","_163D");
+    LOG_PROC("NAME","%s",device_name_str);
 
     err_code = sd_ble_gap_device_name_set(&sec_mode,
                                           (const uint8_t *) device_name_str,

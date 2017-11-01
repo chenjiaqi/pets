@@ -169,7 +169,9 @@ static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t lengt
 
 static void user_ble_device_manage_data_handler(user_ble_device_manage_t *p_device_manage, uint8_t *p_data, uint16_t length)
 {
-    LOG_PROC("info","this is call back, %d", p_data[0]);
+    LOG_INFO("Send Over");
+    //LOG_PROC("info","this is call back, %d", p_data[0]);
+    //LOG_PROC("info","this is call back, %d", p_data[0]);
     if (p_data[0] == 0)
     {
         nrf_gpio_pin_set(LED_4);
@@ -178,6 +180,8 @@ static void user_ble_device_manage_data_handler(user_ble_device_manage_t *p_devi
     {
         nrf_gpio_pin_clear(LED_4);
     }
+    //user_ble_device_manage_cmd_rsp_send(&m_device_manager,"hello", 5);
+    
 }
 
 
@@ -677,6 +681,8 @@ int main(void)
 
     nrf_gpio_cfg_output(LED_4);
     nrf_gpio_pin_clear(LED_4);
+    nrf_gpio_cfg_output(29);
+    nrf_gpio_pin_clear(29);
     //nrf_gpio_pin_clear(23);
 
     LOG_INFO("PETS_PROJ START");
@@ -690,7 +696,7 @@ int main(void)
         if(is_need_read)
         {
             MyDHT11 value;
-            while(start_to_read(&value) != NRF_SUCCESS && 0)
+            while(start_to_read(&value) != NRF_SUCCESS)
             {
                 nrf_delay_ms(200);
                 LOG_ERROR("RETRY");
