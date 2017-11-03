@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-10-26 17:07:27 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-10-30 19:26:11
+ * @Last Modified time: 2017-11-01 17:00:24
  */
 #ifndef USER_BLE_DEVICE_MANAGES_H
 #define USER_BLE_DEVICE_MANAGES_H
@@ -12,6 +12,11 @@
 #include <stdbool.h>
 #include "ble.h"
 #include "ble_srv_common.h"
+#include "ble_gatt.h"
+
+#define USR_BLE_DEVICE_MANAGE_MAX_LED_CHAR_LEN (GATT_MTU_SIZE_DEFAULT - 3)
+#define USR_BLE_DEVICE_MANAGE_MAX_CMD_RSP_CHAR_LEN (GATT_MTU_SIZE_DEFAULT - 3)
+
 
 /**@brief Function for initializing the Device Manage Service
  *

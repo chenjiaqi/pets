@@ -34,6 +34,8 @@ SRC_FILES += \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/MyDHT11.c\
   $(PROJ_DIR)/user_app.c \
+  $(PROJ_DIR)/global.c \
+  $(PROJ_DIR)/user_command.c \
   $(PROJ_DIR)/user_process.c \
   $(SDK_ROOT)/components/ble/common/ble_advdata.c \
   $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \

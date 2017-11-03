@@ -172,8 +172,8 @@ static uint32_t device_manage_led_char_add(user_ble_device_manage_t *p_device_ma
     attr_char_value.p_attr_md = &attr_md;
     attr_char_value.init_len = sizeof(uint8_t);
     attr_char_value.init_offs = 0;
-    attr_char_value.max_len = sizeof(uint8_t);
-    attr_char_value.p_value = (uint8_t *)init_value_encode;
+    attr_char_value.max_len = USR_BLE_DEVICE_MANAGE_MAX_LED_CHAR_LEN;
+    //attr_char_value.p_value = (uint8_t *)init_value_encode;
 
     return sd_ble_gatts_characteristic_add(p_device_manage->service_handle,
                                             &char_md,
@@ -194,6 +194,7 @@ static uint32_t device_manage_cmd_rsp_char_add(user_ble_device_manage_t *p_devic
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
     cccd_md.vloc = BLE_GATTS_VLOC_STACK;
+    //cccd_md.vloc = BLE_GATTS_VLOC_USER;
 
 
     memset(&char_md, 0, sizeof(char_md));
@@ -222,9 +223,9 @@ static uint32_t device_manage_cmd_rsp_char_add(user_ble_device_manage_t *p_devic
 
     attr_char_value.p_uuid = &ble_uuid;
     attr_char_value.p_attr_md = &attr_md;
-    attr_char_value.init_len = sizeof(uint8_t);
+    attr_char_value.init_len = USR_BLE_DEVICE_MANAGE_MAX_CMD_RSP_CHAR_LEN;
     attr_char_value.init_offs = 0;
-    attr_char_value.max_len = 5 * sizeof(uint8_t);
+    attr_char_value.max_len =  USR_BLE_DEVICE_MANAGE_MAX_CMD_RSP_CHAR_LEN;
     //attr_char_value.p_value = (uint8_t *)init_value_encode;
 
     return sd_ble_gatts_characteristic_add(p_device_manage->service_handle,
@@ -289,6 +290,7 @@ void user_ble_device_manage_on_ble_event(user_ble_device_manage_t *p_dev_manage,
     {
         return;
     }
+    //LOG_EVENT("USER_BLE_DEVICE_MANAGE_ON_BLE_EVENT:%d", p_ble_evt->header.evt_id);
 
     switch (p_ble_evt->header.evt_id)
     {

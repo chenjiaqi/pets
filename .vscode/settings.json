@@ -27,8 +27,12 @@
         "nrf_soc.h": "c",
         "sdk_common.h": "c",
         "user_device_info.h": "c",
-        "user_process.h": "c"
-
+        "user_process.h": "c",
+        "global.h": "c",
+        "bsp.h": "c",
+        "user_app.h": "c",
+        "user_command.h": "c",
+        "nrf.h": "c"
     },
     "files.encoding": "utf8",
     "files.exclude": {
