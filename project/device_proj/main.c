@@ -143,7 +143,7 @@ void bsp_event_handler(bsp_event_t event)
         is_need_read = true;
         break;
     case BSP_EVENT_KEY_2:
-        LOG_EVENT("KEY2 PRESSED");
+        LOG_EVENT("KEY2 PRESSED:is_NEED_READ_FLSAH");
         is_need_read_flash = true;
         break;
     case BSP_EVENT_KEY_3:

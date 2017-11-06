@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-10-30 17:11:54 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-11-02 18:09:40
+ * @Last Modified time: 2017-11-06 17:54:47
  */
 #include "user_process.h"
 #include "user_log.h"
@@ -17,6 +17,7 @@
 #include "user_ble_device_manages.h"
 #include "nrf_temp.h"
 #include "nrf_soc.h"
+#include "user_storage.h"
 /**@brief Function for User Process
  *
  * @details Deal with user process
@@ -25,10 +26,14 @@
 extern bool is_need_write_flash ;
 extern bool is_need_read_flash ;
 
+
+
 static bool fs_call_back_flag = false;
+
 
 static user_flash_structure_t user_flash_struct;
 
+#if 0 
 static void fs_evt_handler(fs_evt_t const * const evt, fs_ret_t result);
 FS_REGISTER_CFG(fs_config_t fs_config) =
 {
@@ -52,6 +57,7 @@ static void fs_evt_handler(fs_evt_t const * const evt, fs_ret_t result)
 }
 
 
+
 static void store_temp_humity_to_flash()
 {
     LOG_INFO("Current Store address is: %x", (unsigned int)(fs_config.p_start_addr + current_store_flash_point));
@@ -69,6 +75,9 @@ static void store_temp_humity_to_flash()
     }
 }
 
+#endif
+
+#if 0
 static void start_to_trans_data_fo_app()
 {
     uint32_t err_code;
@@ -92,14 +101,18 @@ static void start_to_trans_data_fo_app()
 
     LOG_PROC("--->","OVER %lx",LOG_UINT(fs_config.p_start_addr + current_position));
 }
+#endif
 
 
 extern void power_manage();
+extern bool is_need_read;
 void user_process(void)
 {
     if(is_need_read_flash)
     {
-        start_to_trans_data_fo_app();
+        //start_to_trans_data_fo_app();
+
+        
 
 #if 0
         LOG_PROC("--->","START");
@@ -195,7 +208,7 @@ void user_process(void)
             user_flash_struct.temperture1 = value.temperatureH;
             user_flash_struct.humidity1 = value.humidityH;
             LOG_PROC("WRITE","Write flash");
-            store_temp_humity_to_flash();
+            //store_temp_humity_to_flash();
         }
         else
         {
@@ -206,9 +219,25 @@ void user_process(void)
 
         LOG_PROC("INFO", "%u:HUMIDITY:%d.%d, TEMPERTURE:%d.%d",LOG_UINT(current_time_stamp),LOG_UINT(value.humidityH), LOG_UINT(value.humidityL),
         LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL));
-        
+        user_store_to_flash(&user_flash_struct);
+
         user_ble_temp_humidity_update(&m_device_manager,value.temperatureH,value.humidityH);
         
         count = ~count;
+        
+    }
+    if(is_need_read)
+    {
+        //find_current_read_pos();
+        static int flag = 0;
+        if(flag == 0)
+        {
+            user_storage_set_address(0x7fff0);
+            flag++;
+        }
+
+        user_store_to_flash(&user_flash_struct);
+        user_flash_struct.time_stamp+=1;
+        is_need_read = false;
     }
 }

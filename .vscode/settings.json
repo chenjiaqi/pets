@@ -32,7 +32,9 @@
         "bsp.h": "c",
         "user_app.h": "c",
         "user_command.h": "c",
-        "nrf.h": "c"
+        "nrf.h": "c",
+        "fstorage.h": "c",
+        "user_storage.h": "c"
     },
     "files.encoding": "utf8",
     "files.exclude": {

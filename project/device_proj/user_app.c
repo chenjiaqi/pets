@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-10-27 16:53:45 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-11-03 09:55:01
+ * @Last Modified time: 2017-11-06 17:51:56
  */
 #include "user_app.h"
 #include "bsp.h"
@@ -30,6 +30,7 @@
 #include <stdbool.h>
 #include "nrf_temp.h"
 #include "user_command.h"
+#include "user_storage.h"
 
 //user_ble_device_manage_t m_device_manager;
 
@@ -432,11 +433,10 @@ void user_app_init(void)
     services_init();
     advertising_init();
     conn_params_init();
-    fs_init();
+    //fs_init();
+    user_storage_init();
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
     timers_init();
-    
-
     //timers_start();
 }

@@ -10,6 +10,7 @@
 #include "nrf.h"
 #include "user_log.h"
 #include "nrf_gpio.h"
+#include "user_ble_device_manages.h"
 
 static void turn_on_led()
 {
@@ -40,6 +41,7 @@ uint32_t deal_width_command(uint8_t * frame, uint16_t len)
     }
     user_command_t cmd = frame[0];
     uint8_t *data = frame + 1;
+    static uint8_t resp_data[20];
     LOG_INFO("Received data is:");
     for (int i = 0; i < len; i++)
     {
@@ -65,21 +67,33 @@ uint32_t deal_width_command(uint8_t * frame, uint16_t len)
     else if(cmd == E_CMD_CONTROL)
     {
         /** <Control> */
+        resp_data[0] = E_CMD_CONTROL;
         switch (*data)
         {
             case E_FUNCTION_TURN_ON_LED:
                 turn_on_led();
+                
+                resp_data[1] = E_FUNCTION_TURN_ON_LED;
+                
+                
                 break;
             case E_FUNCTION_TURN_OFF_LED:
                 turn_off_led();
+                resp_data[1] = E_FUNCTION_TURN_OFF_LED;
+                user_ble_device_manage_cmd_rsp_send(&m_device_manager,&resp_data, 2);
                 break;
             case E_FUNCTION_TURN_ON_BEEP:
                 start_beep();
+                resp_data[1] = E_FUNCTION_TURN_ON_BEEP;
                 break;
             case E_FUNCTION_TURN_OFF_BEEP:
                 stop_beep();
-            break;
+                resp_data[1] = E_FUNCTION_TURN_OFF_BEEP;
+                break;
+            default:
+                resp_data[1] = E_FUNCTION_MIN;
         }
+        user_ble_device_manage_cmd_rsp_send(&m_device_manager,&resp_data, 2);
     }
     else if(cmd == E_CMD_TIME_STAP_RESP)
     {
