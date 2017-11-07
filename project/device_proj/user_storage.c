@@ -145,12 +145,9 @@ void user_store_to_flash(user_flash_structure_t *info)
             power_manage();
         }
     }
-    LOG_PROC("CCC","%d", CUR_REL_POS % PAGE_SIZE);
 
     if (CUR_REL_POS % PAGE_SIZE == PAGE_SIZE -2) // last record in a page
     {
-        LOG_INFO("FLAG POSITION %X", user_storage_info.p_current_write_addr - 1022);
-        
         page_flag = 0xfffffffd;
         fs_call_back_flag = false;
         fs_store(&fs_config, user_storage_info.p_current_write_addr - 1022, &page_flag, 1, NULL);
@@ -167,5 +164,21 @@ void user_storage_set_address(uint32_t p)
     LOG_INFO("JUDGE POSITION %x", user_storage_info.p_current_write_addr);
 }
 
+uint32_t user_storage_get_a_record()
+{
+    if (user_storage_info.p_current_read_addr == 0x00) // first start up
+    {
+        uint32_t *p = user_storage_info.p_current_write_addr + (PAGE_SIZE - (CUR_REL_POS % PAGE_SIZE));
+        LOG_INFO("%X", p);
+        while(p != user_storage_info.p_end_addr && ((*p)&&0x03) &&( *(p+8) == 0xffffffff))
+        {
+            p = p + PAGE_SIZE;
+        }
+        LOG_INFO("%X", p);
+    }
+    else
+    {
+    }
+}
 
 

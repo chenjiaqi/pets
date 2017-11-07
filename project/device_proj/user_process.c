@@ -111,6 +111,7 @@ void user_process(void)
     if(is_need_read_flash)
     {
         //start_to_trans_data_fo_app();
+        user_storage_get_a_record();
 
         
 
