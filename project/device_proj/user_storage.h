@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-11-06 10:41:26 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-11-06 17:57:22
+ * @Last Modified time: 2017-11-07 20:36:20
  */
 
 #ifndef USER_STORAGE_H
@@ -27,6 +27,10 @@ void find_current_write_pos();
 void user_store_to_flash(user_flash_structure_t * info);
 void user_storage_set_address(uint32_t p);
 uint32_t user_storage_get_a_record();
+uint32_t *user_storage_get_current_read_position();
+uint32_t *user_storage_get_current_write_position();
+void user_storage_set_has_been_transformed(uint32_t * from, uint32_t *to);
+void ble_storage_set_register();
 
 
 #endif 

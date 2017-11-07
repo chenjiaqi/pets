@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-11-01 15:59:43 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-11-03 09:51:26
+ * @Last Modified time: 2017-11-07 16:47:55
  */
 
  #ifndef GLOBAL_H
@@ -21,6 +21,8 @@ extern uint32_t current_time_stamp;
 extern bool  is_need_acquire_temp;
 extern uint32_t current_store_flash_point;
 extern user_ble_device_manage_t m_device_manager;
+
+extern uint32_t test_information_count ;
 
 
  #endif

@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-10-30 17:11:54 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-11-06 17:54:47
+ * @Last Modified time: 2017-11-07 17:07:15
  */
 #include "user_process.h"
 #include "user_log.h"
@@ -111,8 +111,10 @@ void user_process(void)
     if(is_need_read_flash)
     {
         //start_to_trans_data_fo_app();
-        user_storage_get_a_record();
-
+        //user_storage_get_a_record();
+        uint32_t * p = user_storage_get_current_read_position();
+        LOG_INFO("Current read pos is %X",LOG_UINT(p));
+        user_storage_set_has_been_transformed(p,user_storage_get_current_write_position());
         
 
 #if 0
@@ -240,5 +242,18 @@ void user_process(void)
         user_store_to_flash(&user_flash_struct);
         user_flash_struct.time_stamp+=1;
         is_need_read = false;
+    }
+
+    if (test_information_count > 0)
+    {
+        
+        static uint32_t temp_data[] = {0x59f89e00,0x00000018,0x59f89f00,0x00000019};
+        temp_data[0]  = current_time_stamp;
+        temp_data[2] = current_time_stamp + 1800;
+        static uint8_t temp[17];
+        temp[0] = 0x05;
+        memcpy(temp+1, temp_data, 16);
+        user_ble_device_manage_cmd_rsp_send(&m_device_manager,&temp,17);
+        test_information_count --;
     }
 }

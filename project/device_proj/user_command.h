@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-11-03 16:28:56 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-11-06 17:44:05
+ * @Last Modified time: 2017-11-07 16:38:59
  */
 #include "global.h"
 
@@ -14,6 +14,7 @@ typedef enum e_user_command
     E_CMD_WRITE_INFORMATION, //2
     E_CMD_CONTROL, //3
     E_CMD_TIME_STAP_RESP, //4
+    E_CMD_GET_TEMP_HUMITY, // 5
     E_CMD_MAX //5
 }user_command_t;
 
