@@ -31,11 +31,14 @@ static void turn_off_led()
 
 static void start_beep()
 {
+    LOG_INFO("Start beep");
+    timers_beep_start();
 
 }
 
 static void stop_beep()
 {
+    timers_beep_stop();
 
 }
 

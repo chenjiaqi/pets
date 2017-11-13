@@ -199,6 +199,26 @@ int main(void)
     nrf_gpio_pin_clear(29);
     //nrf_gpio_pin_clear(29);
     nrf_gpio_pin_set(29);
+    nrf_gpio_cfg_output(22);
+    nrf_gpio_cfg_output(23);
+    nrf_gpio_cfg(
+        22,
+        NRF_GPIO_PIN_DIR_OUTPUT,
+        NRF_GPIO_PIN_INPUT_DISCONNECT,
+        NRF_GPIO_PIN_NOPULL,
+        NRF_GPIO_PIN_H0H1,
+        NRF_GPIO_PIN_NOSENSE);
+
+        nrf_gpio_cfg(
+            23,
+            NRF_GPIO_PIN_DIR_OUTPUT,
+            NRF_GPIO_PIN_INPUT_DISCONNECT,
+            NRF_GPIO_PIN_NOPULL,
+            NRF_GPIO_PIN_H0H1,
+            NRF_GPIO_PIN_NOSENSE);
+
+        nrf_gpio_pin_clear(22);
+        nrf_gpio_pin_set(23);
 
     LOG_INFO("PETS_PROJ START");
     // Enter main loop.
@@ -209,17 +229,37 @@ int main(void)
     for (;;)
     {
         
-        /*
+#if 0
+        uint8_t m=180;
+        uint32_t count = 0;
         while(1)
         {
-            nrf_gpio_pin_clear(LED_4);
-            nrf_gpio_pin_clear(29);
-            nrf_delay_ms(1);
-            nrf_gpio_pin_set(LED_4);
-            nrf_gpio_pin_set(29);
-            nrf_delay_ms(1000);
+            nrf_gpio_pin_clear(22);
+            nrf_gpio_pin_set(23);
+            //nrf_delay_ms(m);
+            nrf_delay_us(m);
+            nrf_gpio_pin_clear(23);
+            nrf_gpio_pin_set(22);
+            //nrf_delay_ms(m);
+            nrf_delay_us(m);
+
+            if(count % 300 == 0)
+            {
+                nrf_gpio_pin_clear(23);
+                nrf_gpio_pin_clear(22);
+                nrf_delay_ms(500);
+            }
+
+            count ++;
+
+            /*
+            nrf_gpio_pin_clear(23);
+            nrf_gpio_pin_clear(22);
+            nrf_delay_ms(1000)
+            */
         }
-        */
+#endif
+
         user_process();
         power_manage();
     }

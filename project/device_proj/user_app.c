@@ -66,8 +66,9 @@ APP_TIMER_DEF(m_beep_timer_id);
 #define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER) /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
-#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(10000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #define LED_MEAS_INTERVAL     APP_TIMER_TICKS(1500, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#define BEEP_MEAS_INTERVAL     APP_TIMER_TICKS(1, APP_TIMER_PRESCALER) / 5  /**< Battery level measurement interval (ticks). */
 
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
 static ble_uuid_t                       m_adv_uuids[] = {{USER_BLE_UUID_DEVICE_MANAGE_SERVICE,0x01}};  /**< Universally unique service identifier. */
@@ -135,6 +136,7 @@ static void on_ble_evt(ble_evt_t *p_ble_evt)
         m_conn_handle = BLE_CONN_HANDLE_INVALID;
         is_ble_connected = false;
         timers_led_stop();
+        timers_beep_stop();
         break; // BLE_GAP_EVT_DISCONNECTED
 
     case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
@@ -225,10 +227,10 @@ static void uart_init(void)
     uint32_t err_code;
     const app_uart_comm_params_t comm_params =
         {
-//            RX_PIN_NUMBER,
-//            TX_PIN_NUMBER,
-            22,
-            23,
+            RX_PIN_NUMBER,
+            TX_PIN_NUMBER,
+//            22,
+//            23,
             RTS_PIN_NUMBER,
             CTS_PIN_NUMBER,
             APP_UART_FLOW_CONTROL_DISABLED,
@@ -443,6 +445,8 @@ static void temp_acq_timeout_handler(void *p_context)
 {
     //LOG_INFO("Temperature acquisition timeout handler");
     current_time_stamp = current_time_stamp + 10;
+    LOG_INFO("%d",TEMPERTURE_ACQUISITION_MEAS_INTERVAL);
+    LOG_INFO("%d",LED_MEAS_INTERVAL);
     is_need_acquire_temp = true;
 }
 
@@ -450,6 +454,25 @@ extern bool is_need_turn_on_led;
 static void led_timeout_handler(void *p_context)
 {
     is_need_turn_on_led = true;
+}
+
+static void beep_timeout_handler(void *p_context)
+{
+    static uint32_t beep_count = 0;
+    if ((beep_count >> 10) % 3 == 0)
+    {
+        if (beep_count % 2)
+        {
+            nrf_gpio_pin_clear(22);
+            nrf_gpio_pin_set(23);
+        }
+        else
+        {
+            nrf_gpio_pin_set(22);
+            nrf_gpio_pin_clear(23);
+        }
+    }
+    beep_count++;
 }
 
 void timers_init()
@@ -462,7 +485,7 @@ void timers_init()
     err_code = app_timer_create(&m_led_timer_id, APP_TIMER_MODE_REPEATED, led_timeout_handler);
     APP_ERROR_CHECK(err_code);
 
-    err_code = app_timer_create(&m_beep_timer_id, APP_TIMER_MODE_REPEATED, led_timeout_handler);
+    err_code = app_timer_create(&m_beep_timer_id, APP_TIMER_MODE_REPEATED, beep_timeout_handler);
     APP_ERROR_CHECK(err_code);
 
 
@@ -490,6 +513,17 @@ void timers_led_stop()
 void timers_stop()
 {
     app_timer_stop(m_temp_acq_timer_id);
+}
+
+void timers_beep_start()
+{
+    //app_timer_start(m_beep_timer_id,LED_ME);
+    app_timer_start(m_beep_timer_id, BEEP_MEAS_INTERVAL, NULL);
+}
+
+void timers_beep_stop()
+{
+    app_timer_stop(m_beep_timer_id);
 }
 
 
