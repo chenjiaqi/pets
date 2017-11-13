@@ -13,4 +13,10 @@
 void user_app_init(void);
 extern user_ble_device_manage_t m_device_manager;
 
+void timers_start();
+void timers_stop();
+void timers_led_start();
+void timers_led_stop();
+void user_app_update_device_name(uint8_t temp, uint8_t humidity);
+
 #endif //  SERVICES_H

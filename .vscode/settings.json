@@ -34,7 +34,11 @@
         "user_command.h": "c",
         "nrf.h": "c",
         "fstorage.h": "c",
-        "user_storage.h": "c"
+        "user_storage.h": "c",
+        "user_storage2.h": "c",
+        "sdk_config.h": "c",
+        "sdk_errors.h": "c",
+        "ble_advdata.h": "c"
     },
     "files.encoding": "utf8",
     "files.exclude": {

@@ -30,11 +30,17 @@
 #include <stdbool.h>
 #include "nrf_temp.h"
 #include "user_command.h"
-#include "user_storage.h"
+#include "user_storage2.h"
+#include "global.h"
 
 //user_ble_device_manage_t m_device_manager;
 
 APP_TIMER_DEF(m_temp_acq_timer_id);
+APP_TIMER_DEF(m_led_timer_id);
+APP_TIMER_DEF(m_beep_timer_id);
+
+
+
 
 #define DEVICE_NAME_PREX                     "DRUID_"                               /**< Name of device. Will be included in the advertising data. */
 #define DEVICE_NAME                     "DRUID_AAAAAAAAAAAA_1F40"                               /**< Name of device. Will be included in the advertising data. */
@@ -60,10 +66,13 @@ APP_TIMER_DEF(m_temp_acq_timer_id);
 #define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER) /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
-#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#define LED_MEAS_INTERVAL     APP_TIMER_TICKS(1500, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
 static ble_uuid_t                       m_adv_uuids[] = {{USER_BLE_UUID_DEVICE_MANAGE_SERVICE,0x01}};  /**< Universally unique service identifier. */
+
+
 
 static void sleep_mode_enter(void)
 {
@@ -82,7 +91,7 @@ static void sleep_mode_enter(void)
 static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 {
     uint32_t err_code;
-    LOG_PROC("ADV_EVENT", "EVENT");
+//    LOG_PROC("ADV_EVENT", "EVENT");
     switch (ble_adv_evt)
     {
     case BLE_ADV_EVT_FAST:
@@ -116,12 +125,16 @@ static void on_ble_evt(ble_evt_t *p_ble_evt)
         err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
         APP_ERROR_CHECK(err_code);
         m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+        is_ble_connected = true;
+
         break; // BLE_GAP_EVT_CONNECTED
 
     case BLE_GAP_EVT_DISCONNECTED:
         err_code = bsp_indication_set(BSP_INDICATE_IDLE);
         APP_ERROR_CHECK(err_code);
         m_conn_handle = BLE_CONN_HANDLE_INVALID;
+        is_ble_connected = false;
+        timers_led_stop();
         break; // BLE_GAP_EVT_DISCONNECTED
 
     case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
@@ -212,8 +225,10 @@ static void uart_init(void)
     uint32_t err_code;
     const app_uart_comm_params_t comm_params =
         {
-            RX_PIN_NUMBER,
-            TX_PIN_NUMBER,
+//            RX_PIN_NUMBER,
+//            TX_PIN_NUMBER,
+            22,
+            23,
             RTS_PIN_NUMBER,
             CTS_PIN_NUMBER,
             APP_UART_FLOW_CONTROL_DISABLED,
@@ -280,7 +295,11 @@ static void user_ble_device_manage_data_handler(user_ble_device_manage_t *p_devi
     }
     user_ble_device_manage_cmd_rsp_send(&m_device_manager, p_data, 1);
 #endif
-    deal_width_command(p_data, length);
+    //deal_width_command(p_data, length);
+    command_info.command = p_data[0];
+    command_info.is_need_deal = true;
+    memcpy(command_info.params, p_data+1, length-1);
+    command_info.params_length = length - 1;
 }
 
 static void services_init(void)
@@ -300,6 +319,27 @@ static void services_init(void)
  * @details This function will set up all the necessary GAP (Generic Access Profile) parameters of
  *          the device. It also sets the permissions and appearance.
  */
+uint8_t device_name_str[] = DEVICE_NAME;
+static void advertising_init(void);
+//void user_app_update_device_name(char *temp_humidity)
+void user_app_update_device_name(uint8_t temp, uint8_t humidity)
+{
+    if (!is_ble_connected)
+    {
+        uint32_t err_code;
+        sprintf((char *)(device_name_str + 19), "%02X%02X", temp, humidity);
+        LOG_INFO("%s",device_name_str);
+        ble_gap_conn_sec_mode_t sec_mode;
+        BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
+
+        err_code = sd_ble_gap_device_name_set(&sec_mode,
+                                              (const uint8_t *)device_name_str,
+                                              strlen((char *)device_name_str));
+        APP_ERROR_CHECK(err_code);
+        advertising_init();
+        LOG_INFO("UPDATE NAME");
+    }
+}
 static void gap_params_init(void)
 {
     uint32_t err_code;
@@ -308,7 +348,7 @@ static void gap_params_init(void)
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
 
-    uint8_t device_name_str[] = DEVICE_NAME;
+    
     err_code = user_get_mac_address_str((uint8_t *)(device_name_str + strlen(DEVICE_NAME_PREX)));
 
     APP_ERROR_CHECK(err_code);
@@ -401,24 +441,55 @@ extern bool is_need_read;
 //extern uint32_t current_time_stamp;
 static void temp_acq_timeout_handler(void *p_context)
 {
-    LOG_INFO("Temperature acquisition timeout handler");
+    //LOG_INFO("Temperature acquisition timeout handler");
     current_time_stamp = current_time_stamp + 10;
     is_need_acquire_temp = true;
 }
 
-static void timers_init()
+extern bool is_need_turn_on_led;
+static void led_timeout_handler(void *p_context)
+{
+    is_need_turn_on_led = true;
+}
+
+void timers_init()
 {
     uint32_t err_code;
 
     err_code = app_timer_create(&m_temp_acq_timer_id, APP_TIMER_MODE_REPEATED, temp_acq_timeout_handler);
     APP_ERROR_CHECK(err_code);
+
+    err_code = app_timer_create(&m_led_timer_id, APP_TIMER_MODE_REPEATED, led_timeout_handler);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = app_timer_create(&m_beep_timer_id, APP_TIMER_MODE_REPEATED, led_timeout_handler);
+    APP_ERROR_CHECK(err_code);
+
+
 }
 
-static void timers_start()
+void timers_start()
 {
     uint32_t err_code;
     err_code = app_timer_start(m_temp_acq_timer_id,TEMPERTURE_ACQUISITION_MEAS_INTERVAL,NULL);
     APP_ERROR_CHECK(err_code);
+}
+
+void timers_led_start()
+{
+    uint32_t err_code;
+    err_code = app_timer_start(m_led_timer_id,LED_MEAS_INTERVAL,NULL);
+    APP_ERROR_CHECK(err_code);
+}
+
+void timers_led_stop()
+{
+    app_timer_stop(m_led_timer_id);
+}
+
+void timers_stop()
+{
+    app_timer_stop(m_temp_acq_timer_id);
 }
 
 
@@ -434,9 +505,14 @@ void user_app_init(void)
     advertising_init();
     conn_params_init();
     //fs_init();
-    user_storage_init();
+    user_storage2_init();
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
     timers_init();
-    //timers_start();
+
+    is_device_registered = user_storage2_is_device_registered();
+    if (is_device_registered)
+    {
+        timers_start();
+    }
 }

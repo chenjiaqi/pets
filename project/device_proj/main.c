@@ -192,37 +192,34 @@ int main(void)
     user_app_init();
 
     nrf_gpio_cfg_output(LED_4);
+//    nrf_gpio_pin_clear(LED_4);
     nrf_gpio_pin_clear(LED_4);
+
     nrf_gpio_cfg_output(29);
     nrf_gpio_pin_clear(29);
-    //nrf_gpio_pin_clear(23);
+    //nrf_gpio_pin_clear(29);
+    nrf_gpio_pin_set(29);
 
     LOG_INFO("PETS_PROJ START");
     // Enter main loop.
+    uint8_t addr_str[(BLE_GAP_ADDR_LEN << 1) + 1];
+    user_get_mac_address_str(addr_str);
+    LOG_INFO("MAC ADDRESS is %s", addr_str);
 
     for (;;)
     {
-        if (is_need_read && 0)
+        
+        /*
+        while(1)
         {
-            MyDHT11 value;
-            while (start_to_read(&value) != NRF_SUCCESS)
-            {
-                nrf_delay_ms(200);
-                LOG_ERROR("RETRY");
-            }
-
-            LOG_PROC("INFO", "%u:HUMIDITY:%d.%d, TEMPERTURE:%d.%d",current_time_stamp,value.humidityH, value.humidityL,
-                     value.temperatureH, value.temperatureL);
-            is_need_read = false;
-
-            uint8_t addr_str[(BLE_GAP_ADDR_LEN << 1) + 1];
-            //user_get_mac_address(addr);
-            //LOG_INFO("%x:%x:%x:%x:%x:%x", addr[0],addr[1],addr[2],addr[3],addr[4],addr[5]);
-            user_get_mac_address_str(addr_str);
-            LOG_INFO("%s", addr_str);
-            user_ble_device_manage_cmd_rsp_send(&m_device_manager, addr_str, 5);
-            //nrf_delay_ms(1000);
+            nrf_gpio_pin_clear(LED_4);
+            nrf_gpio_pin_clear(29);
+            nrf_delay_ms(1);
+            nrf_gpio_pin_set(LED_4);
+            nrf_gpio_pin_set(29);
+            nrf_delay_ms(1000);
         }
+        */
         user_process();
         power_manage();
     }

@@ -46,7 +46,9 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceRoot}"
+                "${workspaceRoot}",
+                "${workspaceRoot}/components/libraries/fstorage",
+                "${workspaceRoot}/project/LOG"
             ],
             "defines": [
                 "_DEBUG",

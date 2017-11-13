@@ -12,16 +12,21 @@
 #include "nrf_gpio.h"
 #include "user_ble_device_manages.h"
 #include "global.h"
+#include "user_storage2.h"
+#include "user_app.h"
+
 
 static void turn_on_led()
 {
-    nrf_gpio_pin_clear(USER_PIN_LED);
-    nrf_gpio_pin_clear(20);
+//    nrf_gpio_pin_clear(USER_PIN_LED);
+//    nrf_gpio_pin_clear(20);
+    timers_led_start();
 }
 static void turn_off_led()
 {
-    nrf_gpio_pin_set(USER_PIN_LED);
-    nrf_gpio_pin_set(20);
+//    nrf_gpio_pin_set(USER_PIN_LED);
+//    nrf_gpio_pin_set(20);
+    timers_led_stop();
 }
 
 static void start_beep()
@@ -34,22 +39,24 @@ static void stop_beep()
 
 }
 
-uint32_t deal_width_command(uint8_t * frame, uint16_t len)
+
+uint32_t deal_width_command(uint8_t command, uint8_t * param, uint16_t len)
 {
-    if (frame == NULL || len > 20)
+    if (param == NULL || len > 20)
     {
         return NRF_ERROR_INVALID_PARAM;
     }
-    user_command_t cmd = frame[0];
-    uint8_t *data = frame + 1;
+    user_command_t cmd = command;
+    uint8_t *data = param;
     static uint8_t resp_data[20];
+#if 0
     LOG_INFO("Received data is:");
     for (int i = 0; i < len; i++)
     {
-        printf("%02x", frame[i]);
+        printf("%02x", param[i]);
     }
     LOG_INFO("Over");
-    
+#endif
 
     if (cmd >= E_CMD_MAX)
     {
@@ -60,17 +67,25 @@ uint32_t deal_width_command(uint8_t * frame, uint16_t len)
     {
         /** <Register> */
         resp_data[0] = E_CMD_REGISTER;
-        resp_data[1] = 0x01;
+        if (user_storage2_is_device_registered())
+        {
+            resp_data[1] = 0x00;
+        }
+        else
+        {
+            user_storage2_register_device();
+            resp_data[1] = 0x01;
+            is_device_registered = true;
+            timers_start();
+        }
         user_ble_device_manage_cmd_rsp_send(&m_device_manager,&resp_data, 2);
-        ble_storage_set_register();
     }
     else if(cmd == E_CMD_WRITE_INFORMATION)
     {
         /** <Write information> */
-        resp_data[0] = E_CMD_WRITE_INFORMATION;
-        memcpy(resp_data+1, frame + 1, len);
-        user_ble_device_manage_cmd_rsp_send(&m_device_manager,&resp_data, len);
-       
+        //resp_data[0] = E_CMD_WRITE_INFORMATION;
+        //memcpy(resp_data+1, frame + 1, len);
+        //user_ble_device_manage_cmd_rsp_send(&m_device_manager,&resp_data, len);
     }
     else if(cmd == E_CMD_CONTROL)
     {
@@ -103,14 +118,43 @@ uint32_t deal_width_command(uint8_t * frame, uint16_t len)
     else if(cmd == E_CMD_TIME_STAP_RESP)
     {
         /** <Updata time stamp> */
-        uint32_t *p_time = (uint32_t *)(frame +1); 
+        uint32_t *p_time = (uint32_t *)param; 
         LOG_INFO("%08x", *p_time);
         LOG_INFO("%08x", current_time_stamp);
         current_time_stamp = *(p_time);
+        //user_ble_device_manage_cmd_rsp_send(&m_device_manager,&current_time_stamp, 2);
     }
     else if(cmd == E_CMD_GET_TEMP_HUMITY)
     {
-        test_information_count = 10;
+        is_need_trans_temp_info = true;
+    }
+    else if(cmd == E_CMD_UNREGISTER)
+    {
+        LOG_INFO("UNREGISTER");
+        user_storage2_unregister_device();
+        is_device_registered = false;
+        resp_data[0] = E_CMD_UNREGISTER;
+        resp_data[1] = 1;
+        user_ble_device_manage_cmd_rsp_send(&m_device_manager,&resp_data, 2);
+        timers_stop();
+    }
+    else if(cmd == E_CMD_REQUIRE_REGISTER)
+    {
+        resp_data[0] = E_CMD_REQUIRE_REGISTER;
+        if(is_device_registered)
+        {
+            resp_data[1] = 1;
+        }
+        else
+        {
+            resp_data[1] = 0;
+        }
+        user_ble_device_manage_cmd_rsp_send(&m_device_manager,&resp_data, 2);
+    }
+    else
+    {
+        resp_data[0]  = 0;
+        user_ble_device_manage_cmd_rsp_send(&m_device_manager, &resp_data, 0);
     }
     return NRF_SUCCESS;
 }

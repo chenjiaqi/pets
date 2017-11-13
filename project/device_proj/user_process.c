@@ -17,7 +17,11 @@
 #include "user_ble_device_manages.h"
 #include "nrf_temp.h"
 #include "nrf_soc.h"
-#include "user_storage.h"
+//#include "user_storage.h"
+#include "user_storage2.h"
+#include "ble_advertising.h"
+#include "global.h"
+#include "nrf_gpio.h"
 /**@brief Function for User Process
  *
  * @details Deal with user process
@@ -32,6 +36,8 @@ static bool fs_call_back_flag = false;
 
 
 static user_flash_structure_t user_flash_struct;
+
+extern bool is_need_turn_on_led;
 
 #if 0 
 static void fs_evt_handler(fs_evt_t const * const evt, fs_ret_t result);
@@ -104,17 +110,35 @@ static void start_to_trans_data_fo_app()
 #endif
 
 
+
 extern void power_manage();
 extern bool is_need_read;
+extern void advertising_init();
+
+
 void user_process(void)
 {
     if(is_need_read_flash)
     {
+        if (user_storage2_is_device_registered())
+        {
+            LOG_INFO("REGISTERED");
+        }
+        else{
+            LOG_INFO(" NOT REGISTERED");
+        }
+        //user_storage2_test_set_read_addr();
+        uint32_t count = user_storage2_get_record_count();
+        LOG_INFO("Record is: %d", count);
+
+
+        //user_app_update_device_name(0x33, 0x44);
+        //user_storage2_register_device();
         //start_to_trans_data_fo_app();
         //user_storage_get_a_record();
-        uint32_t * p = user_storage_get_current_read_position();
-        LOG_INFO("Current read pos is %X",LOG_UINT(p));
-        user_storage_set_has_been_transformed(p,user_storage_get_current_write_position());
+//        uint32_t * p = user_storage_get_current_read_position();
+//        LOG_INFO("Current read pos is %X",LOG_UINT(p));
+//        user_storage_set_has_been_transformed(p,user_storage_get_current_write_position());
         
 
 #if 0
@@ -211,7 +235,8 @@ void user_process(void)
             user_flash_struct.temperture1 = value.temperatureH;
             user_flash_struct.humidity1 = value.humidityH;
             LOG_PROC("WRITE","Write flash");
-            //store_temp_humity_to_flash();
+            user_storage2_store_a_record(&user_flash_struct);
+            
         }
         else
         {
@@ -222,28 +247,29 @@ void user_process(void)
 
         LOG_PROC("INFO", "%u:HUMIDITY:%d.%d, TEMPERTURE:%d.%d",LOG_UINT(current_time_stamp),LOG_UINT(value.humidityH), LOG_UINT(value.humidityL),
         LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL));
-        user_store_to_flash(&user_flash_struct);
+        //user_store_to_flash(&user_flash_struct);
 
         user_ble_temp_humidity_update(&m_device_manager,value.temperatureH,value.humidityH);
+        user_app_update_device_name(value.temperatureH, value.humidityH);
         
         count = ~count;
-        
     }
+
     if(is_need_read)
     {
         //find_current_read_pos();
         static int flag = 0;
         if(flag == 0)
         {
-            user_storage_set_address(0x7fff0);
+            //user_storage_set_address(0x7fff0);
             flag++;
         }
-
-        user_store_to_flash(&user_flash_struct);
+        //user_store_to_flash(&user_flash_struct);
         user_flash_struct.time_stamp+=1;
         is_need_read = false;
     }
 
+    /*
     if (test_information_count > 0)
     {
         
@@ -255,5 +281,59 @@ void user_process(void)
         memcpy(temp+1, temp_data, 16);
         user_ble_device_manage_cmd_rsp_send(&m_device_manager,&temp,17);
         test_information_count --;
+    }
+    */
+    if (is_need_trans_temp_info)
+    {
+        if(is_ble_connected)
+        {
+            static uint16_t count = 0;
+            uint32_t *p = user_storage2_get_a_record();
+            static uint8_t temp_data[20];
+            temp_data[0] = 0x05;
+            memcpy(temp_data+1, (uint8_t *)p, 16);
+            if (p && request_info_count > 0)
+            {
+                count++;
+                //user_ble_device_manage_cmd_rsp_send(&m_device_manager, temp_data, 17);
+                uint32_t err_code = 0;
+                do
+                {
+                    err_code =  user_ble_device_manage_cmd_rsp_send(&m_device_manager, temp_data, 17);
+                }while((err_code != NRF_SUCCESS) && (err_code != NRF_ERROR_INVALID_STATE));
+
+                request_info_count --;
+            }
+            else
+            {
+                LOG_INFO("Trans info %d", count);
+                is_need_trans_temp_info = false;
+                count = 0;
+                request_info_count = 128;
+                // trans over
+                // write current pos into flash
+            }
+        }
+        else
+        {
+            is_need_trans_temp_info = false;
+            // disconnected when in trans
+            // write current pos into flash
+        }
+    }
+
+    if (command_info.is_need_deal)
+    {
+        LOG_PROC("CMD","%d, %d",command_info.command, command_info.params_length);
+        deal_width_command(command_info.command, command_info.params, command_info.params_length);
+        command_info.is_need_deal = false;
+    }
+
+    if (is_need_turn_on_led)
+    {
+        nrf_gpio_pin_clear(29);
+        nrf_delay_ms(10);
+        nrf_gpio_pin_set(29);
+        is_need_turn_on_led = false;
     }
 }
