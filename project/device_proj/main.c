@@ -199,6 +199,7 @@ int main(void)
     nrf_gpio_pin_clear(29);
     //nrf_gpio_pin_clear(29);
     nrf_gpio_pin_set(29);
+    /*
     nrf_gpio_cfg_output(22);
     nrf_gpio_cfg_output(23);
     nrf_gpio_cfg(
@@ -219,6 +220,7 @@ int main(void)
 
         nrf_gpio_pin_clear(22);
         nrf_gpio_pin_set(23);
+    */
 
     LOG_INFO("PETS_PROJ START");
     // Enter main loop.

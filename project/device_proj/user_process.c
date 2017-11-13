@@ -336,4 +336,26 @@ void user_process(void)
         nrf_gpio_pin_set(29);
         is_need_turn_on_led = false;
     }
+
+    if (is_need_request_time_stamp)
+    {
+        LOG_INFO("Request time stamp");
+        uint8_t time_stamp_request_frame[] = {0x04};
+        user_ble_device_manage_cmd_rsp_send(&m_device_manager,time_stamp_request_frame,1);
+        is_need_request_time_stamp = false;
+    }
+
+    if (is_ble_connected_event_come)
+    {
+        timers_time_stamp_request_start();
+        is_ble_connected_event_come = false;
+    }
+
+    if (is_ble_connected_event_come)
+    {
+        timers_time_stamp_request_stop();
+        timers_led_stop();
+        timers_beep_stop();
+        is_ble_connected_event_come = false;
+    }
 }

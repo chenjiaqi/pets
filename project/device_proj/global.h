@@ -42,6 +42,12 @@ extern bool is_ble_connected;
 
 extern bool is_need_trun_on_led;
 
+extern bool is_need_request_time_stamp;
+
+extern bool is_ble_connected_event_come;
+
+extern bool is_ble_disconnected_event_come;
+
 extern uint32_t request_info_count;
 
 

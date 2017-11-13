@@ -125,6 +125,7 @@ uint32_t deal_width_command(uint8_t command, uint8_t * param, uint16_t len)
         LOG_INFO("%08x", *p_time);
         LOG_INFO("%08x", current_time_stamp);
         current_time_stamp = *(p_time);
+        timers_time_stamp_request_stop();
         //user_ble_device_manage_cmd_rsp_send(&m_device_manager,&current_time_stamp, 2);
     }
     else if(cmd == E_CMD_GET_TEMP_HUMITY)

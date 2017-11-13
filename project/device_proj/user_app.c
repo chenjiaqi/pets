@@ -38,6 +38,7 @@
 APP_TIMER_DEF(m_temp_acq_timer_id);
 APP_TIMER_DEF(m_led_timer_id);
 APP_TIMER_DEF(m_beep_timer_id);
+APP_TIMER_DEF(m_request_time_stamp_timer_id);
 
 
 
@@ -127,6 +128,8 @@ static void on_ble_evt(ble_evt_t *p_ble_evt)
         APP_ERROR_CHECK(err_code);
         m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
         is_ble_connected = true;
+        //is_need_request_time_stamp = true;
+        is_ble_connected_event_come = true;
 
         break; // BLE_GAP_EVT_CONNECTED
 
@@ -227,10 +230,10 @@ static void uart_init(void)
     uint32_t err_code;
     const app_uart_comm_params_t comm_params =
         {
-            RX_PIN_NUMBER,
-            TX_PIN_NUMBER,
-//            22,
-//            23,
+//            RX_PIN_NUMBER,
+//            TX_PIN_NUMBER,
+            22,
+            23,
             RTS_PIN_NUMBER,
             CTS_PIN_NUMBER,
             APP_UART_FLOW_CONTROL_DISABLED,
@@ -445,8 +448,6 @@ static void temp_acq_timeout_handler(void *p_context)
 {
     //LOG_INFO("Temperature acquisition timeout handler");
     current_time_stamp = current_time_stamp + 10;
-    LOG_INFO("%d",TEMPERTURE_ACQUISITION_MEAS_INTERVAL);
-    LOG_INFO("%d",LED_MEAS_INTERVAL);
     is_need_acquire_temp = true;
 }
 
@@ -475,6 +476,12 @@ static void beep_timeout_handler(void *p_context)
     beep_count++;
 }
 
+static void time_stamp_request_timeout_handler(void *p_context)
+{
+    is_need_request_time_stamp = true;
+    LOG_INFO("Time stamp request");
+}
+
 void timers_init()
 {
     uint32_t err_code;
@@ -488,6 +495,8 @@ void timers_init()
     err_code = app_timer_create(&m_beep_timer_id, APP_TIMER_MODE_REPEATED, beep_timeout_handler);
     APP_ERROR_CHECK(err_code);
 
+    err_code = app_timer_create(&m_request_time_stamp_timer_id, APP_TIMER_MODE_REPEATED, time_stamp_request_timeout_handler);
+    APP_ERROR_CHECK(err_code);
 
 }
 
@@ -524,6 +533,16 @@ void timers_beep_start()
 void timers_beep_stop()
 {
     app_timer_stop(m_beep_timer_id);
+}
+
+void timers_time_stamp_request_start()
+{
+    app_timer_start(m_request_time_stamp_timer_id, LED_MEAS_INTERVAL, NULL);
+}
+
+void timers_time_stamp_request_stop()
+{
+    app_timer_stop(m_request_time_stamp_timer_id);
 }
 
 

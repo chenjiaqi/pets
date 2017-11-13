@@ -17,6 +17,13 @@ bool is_need_turn_on_led = false;
 user_ble_device_manage_t m_device_manager;
 bool is_device_registered = false;
 
+bool is_need_request_time_stamp = false;
+
+bool is_ble_connected_event_come = false;
+
+bool is_ble_disconnected_event_come = false;
+
+
 bool is_ble_connected = false;
 
 uint32_t current_store_flash_point = 0;
