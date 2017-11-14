@@ -230,10 +230,10 @@ static void uart_init(void)
     uint32_t err_code;
     const app_uart_comm_params_t comm_params =
         {
-//            RX_PIN_NUMBER,
-//            TX_PIN_NUMBER,
-            22,
-            23,
+            RX_PIN_NUMBER,
+            TX_PIN_NUMBER,
+//            22,
+//            23,
             RTS_PIN_NUMBER,
             CTS_PIN_NUMBER,
             APP_UART_FLOW_CONTROL_DISABLED,
@@ -248,6 +248,7 @@ static void uart_init(void)
                        APP_IRQ_PRIORITY_LOW,
                        err_code);
     APP_ERROR_CHECK(err_code);
+    //app_uart_close();
 }
 
 static void ble_stack_init(void)
@@ -473,6 +474,13 @@ static void beep_timeout_handler(void *p_context)
             nrf_gpio_pin_clear(23);
         }
     }
+    
+    else
+    {
+        nrf_gpio_pin_set(22);
+        nrf_gpio_pin_set(23);
+    }
+
     beep_count++;
 }
 
@@ -517,6 +525,7 @@ void timers_led_start()
 void timers_led_stop()
 {
     app_timer_stop(m_led_timer_id);
+    
 }
 
 void timers_stop()
@@ -533,6 +542,13 @@ void timers_beep_start()
 void timers_beep_stop()
 {
     app_timer_stop(m_beep_timer_id);
+    /*
+    nrf_gpio_pin_set(22);
+    nrf_gpio_pin_set(23);
+    nrf_gpio_pin_set(22);
+    nrf_gpio_pin_set(23);
+    */
+    is_ble_connected = true;
 }
 
 void timers_time_stamp_request_start()
@@ -552,11 +568,16 @@ void user_app_init(void)
     nrf_temp_init();
     uart_init();
     nrf_drv_gpiote_init();
+
     ble_stack_init();
+    
     gap_params_init();
+    
     services_init();
+    
     advertising_init();
     conn_params_init();
+    
     //fs_init();
     user_storage2_init();
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);

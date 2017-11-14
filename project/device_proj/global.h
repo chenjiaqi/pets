@@ -48,6 +48,8 @@ extern bool is_ble_connected_event_come;
 
 extern bool is_ble_disconnected_event_come;
 
+extern bool is_beep_stopped;
+
 extern uint32_t request_info_count;
 
 

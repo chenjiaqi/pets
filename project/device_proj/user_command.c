@@ -39,6 +39,7 @@ static void start_beep()
 static void stop_beep()
 {
     timers_beep_stop();
+    is_beep_stopped = true;
 
 }
 

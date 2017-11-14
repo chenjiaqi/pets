@@ -332,8 +332,10 @@ void user_process(void)
     if (is_need_turn_on_led)
     {
         nrf_gpio_pin_clear(29);
+        nrf_gpio_pin_clear(20);
         nrf_delay_ms(10);
         nrf_gpio_pin_set(29);
+        nrf_gpio_pin_set(20);
         is_need_turn_on_led = false;
     }
 
@@ -357,5 +359,12 @@ void user_process(void)
         timers_led_stop();
         timers_beep_stop();
         is_ble_connected_event_come = false;
+    }
+
+    if (is_beep_stopped)
+    {
+        nrf_gpio_pin_set(22);
+        nrf_gpio_pin_set(23);
+        is_beep_stopped = false;
     }
 }

@@ -188,20 +188,25 @@ int main(void)
     // Initialize.
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
 
-    buttons_leds_init(&erase_bonds);
-    user_app_init();
+    //buttons_leds_init(&erase_bonds);
 
     nrf_gpio_cfg_output(LED_4);
-//    nrf_gpio_pin_clear(LED_4);
-    nrf_gpio_pin_clear(LED_4);
+    nrf_gpio_pin_set(LED_4);
+    user_app_init();
+
+    //nrf_gpio_pin_clear(LED_4);
+
+    
+    //nrf_gpio_pin_clear(LED_4);
 
     nrf_gpio_cfg_output(29);
     nrf_gpio_pin_clear(29);
     //nrf_gpio_pin_clear(29);
     nrf_gpio_pin_set(29);
-    /*
+    //printf("start\r\n");
     nrf_gpio_cfg_output(22);
     nrf_gpio_cfg_output(23);
+    
     nrf_gpio_cfg(
         22,
         NRF_GPIO_PIN_DIR_OUTPUT,
@@ -219,14 +224,16 @@ int main(void)
             NRF_GPIO_PIN_NOSENSE);
 
         nrf_gpio_pin_clear(22);
-        nrf_gpio_pin_set(23);
-    */
+        nrf_gpio_pin_clear(23);
 
-    LOG_INFO("PETS_PROJ START");
+    
+    //LOG_INFO("PETS_PROJ START");
     // Enter main loop.
     uint8_t addr_str[(BLE_GAP_ADDR_LEN << 1) + 1];
     user_get_mac_address_str(addr_str);
     LOG_INFO("MAC ADDRESS is %s", addr_str);
+    
+    
 
     for (;;)
     {
