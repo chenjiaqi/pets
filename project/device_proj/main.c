@@ -193,6 +193,8 @@ int main(void)
     nrf_gpio_cfg_output(LED_4);
     nrf_gpio_pin_set(LED_4);
     user_app_init();
+    //nrf_gpio_cfg_default(5);
+    //nrf_gpio_cfg_default(7);
 
     //nrf_gpio_pin_clear(LED_4);
 
@@ -231,9 +233,9 @@ int main(void)
     // Enter main loop.
     uint8_t addr_str[(BLE_GAP_ADDR_LEN << 1) + 1];
     user_get_mac_address_str(addr_str);
-    LOG_INFO("MAC ADDRESS is %s", addr_str);
+    //LOG_INFO("MAC ADDRESS is %s", addr_str);
     
-    
+   //nrf_gpio_pin_clear(29); 
 
     for (;;)
     {
@@ -257,6 +259,7 @@ int main(void)
                 nrf_gpio_pin_clear(23);
                 nrf_gpio_pin_clear(22);
                 nrf_delay_ms(500);
+                //nrf_gpio_pin_clear(29); 
             }
 
             count ++;

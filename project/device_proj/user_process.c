@@ -122,14 +122,14 @@ void user_process(void)
     {
         if (user_storage2_is_device_registered())
         {
-            LOG_INFO("REGISTERED");
+            //LOG_INFO("REGISTERED");
         }
         else{
-            LOG_INFO(" NOT REGISTERED");
+            //LOG_INFO(" NOT REGISTERED");
         }
         //user_storage2_test_set_read_addr();
         uint32_t count = user_storage2_get_record_count();
-        LOG_INFO("Record is: %d", count);
+        //LOG_INFO("Record is: %d", count);
 
 
         //user_app_update_device_name(0x33, 0x44);
@@ -306,7 +306,7 @@ void user_process(void)
             }
             else
             {
-                LOG_INFO("Trans info %d", count);
+                //LOG_INFO("Trans info %d", count);
                 is_need_trans_temp_info = false;
                 count = 0;
                 request_info_count = 128;
@@ -341,7 +341,7 @@ void user_process(void)
 
     if (is_need_request_time_stamp)
     {
-        LOG_INFO("Request time stamp");
+        //LOG_INFO("Request time stamp");
         uint8_t time_stamp_request_frame[] = {0x04};
         user_ble_device_manage_cmd_rsp_send(&m_device_manager,time_stamp_request_frame,1);
         is_need_request_time_stamp = false;

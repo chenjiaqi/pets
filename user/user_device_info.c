@@ -59,7 +59,7 @@ uint32_t user_get_mac_address_str(uint8_t *p_addr_str)
 
     if (err_code != NRF_SUCCESS)
     {
-        LOG_ERROR("%x", LOG_UINT(err_code));
+        //LOG_ERROR("%x", LOG_UINT(err_code));
         return err_code;
     }
     

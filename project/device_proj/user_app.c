@@ -67,9 +67,10 @@ APP_TIMER_DEF(m_request_time_stamp_timer_id);
 #define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER) /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
-#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(10000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(1800*1000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #define LED_MEAS_INTERVAL     APP_TIMER_TICKS(1500, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #define BEEP_MEAS_INTERVAL     APP_TIMER_TICKS(1, APP_TIMER_PRESCALER) / 5  /**< Battery level measurement interval (ticks). */
+#define TIME_STAMP_REQUEST_MEAS_INTERVAL     APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER)   /**< Battery level measurement interval (ticks). */
 
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
 static ble_uuid_t                       m_adv_uuids[] = {{USER_BLE_UUID_DEVICE_MANAGE_SERVICE,0x01}};  /**< Universally unique service identifier. */
@@ -230,10 +231,10 @@ static void uart_init(void)
     uint32_t err_code;
     const app_uart_comm_params_t comm_params =
         {
-            RX_PIN_NUMBER,
-            TX_PIN_NUMBER,
-//            22,
-//            23,
+//            RX_PIN_NUMBER,
+//            TX_PIN_NUMBER,
+            22,
+            23,
             RTS_PIN_NUMBER,
             CTS_PIN_NUMBER,
             APP_UART_FLOW_CONTROL_DISABLED,
@@ -334,7 +335,7 @@ void user_app_update_device_name(uint8_t temp, uint8_t humidity)
     {
         uint32_t err_code;
         sprintf((char *)(device_name_str + 19), "%02X%02X", temp, humidity);
-        LOG_INFO("%s",device_name_str);
+        //LOG_INFO("%s",device_name_str);
         ble_gap_conn_sec_mode_t sec_mode;
         BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
 
@@ -343,7 +344,7 @@ void user_app_update_device_name(uint8_t temp, uint8_t humidity)
                                               strlen((char *)device_name_str));
         APP_ERROR_CHECK(err_code);
         advertising_init();
-        LOG_INFO("UPDATE NAME");
+        //LOG_INFO("UPDATE NAME");
     }
 }
 static void gap_params_init(void)
@@ -359,7 +360,7 @@ static void gap_params_init(void)
 
     APP_ERROR_CHECK(err_code);
     sprintf((char *)(device_name_str + 18), "%s", "_163D");
-    LOG_PROC("NAME", "%s", device_name_str);
+    //LOG_PROC("NAME", "%s", device_name_str);
 
     err_code = sd_ble_gap_device_name_set(&sec_mode,
                                           (const uint8_t *)device_name_str,
@@ -448,7 +449,7 @@ extern bool is_need_read;
 static void temp_acq_timeout_handler(void *p_context)
 {
     //LOG_INFO("Temperature acquisition timeout handler");
-    current_time_stamp = current_time_stamp + 10;
+    current_time_stamp = current_time_stamp + 1800;
     is_need_acquire_temp = true;
 }
 
@@ -487,7 +488,7 @@ static void beep_timeout_handler(void *p_context)
 static void time_stamp_request_timeout_handler(void *p_context)
 {
     is_need_request_time_stamp = true;
-    LOG_INFO("Time stamp request");
+    //LOG_INFO("Time stamp request");
 }
 
 void timers_init()
@@ -553,7 +554,7 @@ void timers_beep_stop()
 
 void timers_time_stamp_request_start()
 {
-    app_timer_start(m_request_time_stamp_timer_id, LED_MEAS_INTERVAL, NULL);
+    app_timer_start(m_request_time_stamp_timer_id, TIME_STAMP_REQUEST_MEAS_INTERVAL, NULL);
 }
 
 void timers_time_stamp_request_stop()
@@ -566,7 +567,7 @@ void user_app_init(void)
 {
     uint32_t err_code;
     nrf_temp_init();
-    uart_init();
+    //uart_init();
     nrf_drv_gpiote_init();
 
     ble_stack_init();

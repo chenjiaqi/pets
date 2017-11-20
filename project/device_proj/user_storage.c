@@ -40,7 +40,7 @@ static void fs_evt_handler(fs_evt_t const * const evt, fs_ret_t result)
     }
     else
     {
-        LOG_EVENT("fstorage command completed");
+        //LOG_EVENT("fstorage command completed");
         fs_call_back_flag = true;
     }
 }
@@ -70,13 +70,13 @@ extern void power_manage();
 
 void find_current_write_pos()
 {
-    LOG_INFO("%X", user_storage_info.p_current_write_addr);
+    //LOG_INFO("%X", user_storage_info.p_current_write_addr);
     if (CUR_REL_POS % PAGE_SIZE == 0)
     {
         //LOG_INFO("reach page");
         while(((*(user_storage_info.p_current_write_addr)) & 0x03) == 0x00)
         {
-            LOG_INFO("next page");
+            //LOG_INFO("next page");
             user_storage_info.p_current_write_addr += PAGE_SIZE;
 
             if (user_storage_info.p_current_write_addr == user_storage_info.p_start_addr + PAGE_NUM * PAGE_SIZE)
@@ -105,11 +105,11 @@ void find_current_write_pos()
         {
             power_manage();
         }
-        LOG_INFO("Erase SUCCESS\r\n");
+        //LOG_INFO("Erase SUCCESS\r\n");
         user_storage_info.p_current_write_addr += 8; //skip page head
     }
 
-    LOG_INFO("Current pos is %X:%X", LOG_UINT(user_storage_info.p_current_write_addr), *(user_storage_info.p_current_write_addr));
+    //LOG_INFO("Current pos is %X:%X", LOG_UINT(user_storage_info.p_current_write_addr), *(user_storage_info.p_current_write_addr));
 }
 
 void user_storage_init()
@@ -118,7 +118,7 @@ void user_storage_init()
     user_storage_info.p_start_addr = fs_config.p_start_addr + PAGE_SIZE;
     user_storage_info.p_end_addr = fs_config.p_end_addr;
     user_storage_info.p_current_write_addr = fs_config.p_start_addr + PAGE_SIZE;
-    LOG_INFO("%X--->%X",LOG_UINT(user_storage_info.p_start_addr), LOG_UINT(user_storage_info.p_end_addr));
+    //LOG_INFO("%X--->%X",LOG_UINT(user_storage_info.p_start_addr), LOG_UINT(user_storage_info.p_end_addr));
     //fs_store(&fs_config, fs_config.p_start_addr + 22, &a,1, NULL);
     //find_current_write_pos();
 }
@@ -133,11 +133,11 @@ void user_store_to_flash(user_flash_structure_t *info)
     {
         power_manage();
     }
-    LOG_INFO("Write Over");
+    //LOG_INFO("Write Over");
 
     if (CUR_REL_POS % PAGE_SIZE == 8)
     {
-        LOG_INFO("Write flag");
+        //LOG_INFO("Write flag");
         page_flag = 0xfffffffe;
         fs_store(&fs_config, user_storage_info.p_current_write_addr - 8, &page_flag, 1, NULL);
         fs_call_back_flag = false;
@@ -214,7 +214,7 @@ static void find_read_pos_from_head(uint32_t *head)
 void user_storage_set_address(uint32_t p)
 {
     user_storage_info.p_current_write_addr = user_storage_info.p_end_addr - 4;
-    LOG_INFO("JUDGE POSITION %x", user_storage_info.p_current_write_addr);
+    //LOG_INFO("JUDGE POSITION %x", user_storage_info.p_current_write_addr);
 }
 
 /** <return current read pos> */
@@ -245,13 +245,13 @@ uint32_t user_storage_get_a_record()
     if (user_storage_info.p_current_read_addr == 0x00) // first start up
     {
         uint32_t *p = user_storage_info.p_current_write_addr + (PAGE_SIZE - (CUR_REL_POS % PAGE_SIZE));
-        LOG_INFO("%X", p);
+        //LOG_INFO("%X", p);
 
         /** <Not writted or not readed> */
         while (p != user_storage_info.p_end_addr && ((((*p) & 0x03) == 0x03) || (*(p + 7) == 0x00)))
         {
             p = p + PAGE_SIZE;
-            LOG_INFO("Find next page:%x", LOG_UINT(p));
+            //LOG_INFO("Find next page:%x", LOG_UINT(p));
             if (p == user_storage_info.p_end_addr)
             {
                 p = user_storage_info.p_start_addr;
@@ -264,7 +264,7 @@ uint32_t user_storage_get_a_record()
     }
     else
     {
-        LOG_INFO("Read addr is:%X", user_storage_info.p_current_read_addr += 4);
+        //LOG_INFO("Read addr is:%X", user_storage_info.p_current_read_addr += 4);
         if (CUR_READ_REL_POS % PAGE_SIZE == 0)
         {
             if(user_storage_info.p_current_read_addr == user_storage_info.p_end_addr)
@@ -295,15 +295,15 @@ void user_storage_set_has_been_transformed(uint32_t * from, uint32_t *to)
     {
         LOG_ERROR("Invalid param");
     }
-    LOG_INFO("%X--->%X", from, to);
-    LOG_INFO("%d", to - from);
+    //LOG_INFO("%X--->%X", from, to);
+    //LOG_INFO("%d", to - from);
     from_page_start = get_page_start_addr(from);
     to_page_start = get_page_start_addr(to);
 
 
     if (get_page_start_addr(from) == get_page_start_addr(to))
     {
-        LOG_INFO("IN A PAGE");
+        //LOG_INFO("IN A PAGE");
         //LOG_INFO("%d, %d",(from - from_page_start)>>6, ((from - from_page_start) >> 2) % 16);
         //LOG_INFO("%d, %d",(to - to_page_start)>>6, ((to - to_page_start) >> 2) % 16);
 
@@ -315,8 +315,8 @@ void user_storage_set_has_been_transformed(uint32_t * from, uint32_t *to)
         end_word_pos = (to - to_page_start) >> 6;
         end_bits_pos = ((to - to_page_start) >> 2) % 16;
 
-        LOG_INFO("%d, %d",start_word_pos, start_bits_pos);
-        LOG_INFO("%d, %d",end_word_pos, end_bits_pos);
+        //LOG_INFO("%d, %d",start_word_pos, start_bits_pos);
+        //LOG_INFO("%d, %d",end_word_pos, end_bits_pos);
 
         for(int i = start_word_pos; i < end_word_pos; i++)
         {

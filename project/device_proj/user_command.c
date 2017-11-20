@@ -31,7 +31,7 @@ static void turn_off_led()
 
 static void start_beep()
 {
-    LOG_INFO("Start beep");
+    //LOG_INFO("Start beep");
     timers_beep_start();
 
 }
@@ -123,8 +123,8 @@ uint32_t deal_width_command(uint8_t command, uint8_t * param, uint16_t len)
     {
         /** <Updata time stamp> */
         uint32_t *p_time = (uint32_t *)param; 
-        LOG_INFO("%08x", *p_time);
-        LOG_INFO("%08x", current_time_stamp);
+        //LOG_INFO("%08x", *p_time);
+        //LOG_INFO("%08x", current_time_stamp);
         current_time_stamp = *(p_time);
         timers_time_stamp_request_stop();
         //user_ble_device_manage_cmd_rsp_send(&m_device_manager,&current_time_stamp, 2);

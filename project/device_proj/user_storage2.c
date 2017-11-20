@@ -47,7 +47,7 @@ FS_REGISTER_CFG(fs_config_t info_fs_config) =
 void user_storage2_init()
 {
     fs_init();
-    LOG_INFO("DATA:%X-->%X,INFO:%X-->%X",LOG_UINT(data_fs_config.p_start_addr), LOG_UINT(data_fs_config.p_end_addr),LOG_UINT(info_fs_config.p_start_addr), LOG_UINT(info_fs_config.p_end_addr));
+    //LOG_INFO("DATA:%X-->%X,INFO:%X-->%X",LOG_UINT(data_fs_config.p_start_addr), LOG_UINT(data_fs_config.p_end_addr),LOG_UINT(info_fs_config.p_start_addr), LOG_UINT(info_fs_config.p_end_addr));
     user_storage_info.p_start_addr = data_fs_config.p_start_addr;
     user_storage_info.p_end_addr = data_fs_config.p_end_addr;
     user_storage_info.p_current_write_addr = data_fs_config.p_start_addr;
@@ -123,7 +123,7 @@ void find_current_write_pos()
             }
         }
     }
-    LOG_INFO("ADDRESS:%X", p_write);
+    //LOG_INFO("ADDRESS:%X", p_write);
 
 
     while(*p_write != 0xffffffff)
@@ -168,7 +168,7 @@ void find_current_write_pos()
 void user_storage2_store_a_record(user_flash_structure_t * data)
 {
     find_current_write_pos();
-    LOG_INFO("Current pos is:%X--[%X]", user_storage_info.p_current_write_addr, *(user_storage_info.p_current_write_addr));
+    //LOG_INFO("Current pos is:%X--[%X]", user_storage_info.p_current_write_addr, *(user_storage_info.p_current_write_addr));
     fs_call_back_flag = false;
     fs_store(&data_fs_config, user_storage_info.p_current_write_addr, data, 2, NULL);
     while(!fs_call_back_flag)
@@ -250,7 +250,7 @@ uint32_t * user_storage2_get_a_record()
 
 uint32_t user_storage2_get_record_count()
 {
-    LOG_INFO("Current read address is 0x%X", LOG_UINT(user_storage_info.p_current_read_addr));
+    //LOG_INFO("Current read address is 0x%X", LOG_UINT(user_storage_info.p_current_read_addr));
     if(user_storage_info.p_current_read_addr <= user_storage_info.p_current_write_addr)
     {
         return ((user_storage_info.p_current_write_addr - user_storage_info.p_current_read_addr) / 4);

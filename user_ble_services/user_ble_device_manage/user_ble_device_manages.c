@@ -16,12 +16,12 @@ static void on_write(user_ble_device_manage_t *p_device_manage, ble_evt_t *p_ble
 
         if (ble_srv_is_notification_enabled(p_evt_write->data))
         {
-            LOG_EVENT("ENABLE");
+            //LOG_EVENT("ENABLE");
             p_device_manage->is_com_rsp_notification_enable = true;
         }
         else
         {
-            LOG_EVENT("DISABLE");
+            //LOG_EVENT("DISABLE");
             p_device_manage->is_com_rsp_notification_enable = false;
         }
     }
