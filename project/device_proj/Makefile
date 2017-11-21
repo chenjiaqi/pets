@@ -29,6 +29,8 @@ SRC_FILES += \
   $(SDK_ROOT)/components/drivers_nrf/common/nrf_drv_common.c \
   $(SDK_ROOT)/components/drivers_nrf/gpiote/nrf_drv_gpiote.c \
   $(SDK_ROOT)/components/drivers_nrf/uart/nrf_drv_uart.c \
+  $(SDK_ROOT)/components/drivers_nrf/saadc/nrf_drv_saadc.c \
+  $(SDK_ROOT)/components/drivers_nrf/hal/nrf_saadc.c \
   $(PROJ_DIR)/../bsp/bsp.c \
   $(PROJ_DIR)/../bsp/bsp_btn_ble.c \
   $(PROJ_DIR)/main.c \
@@ -77,6 +79,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/mailbox \
   $(SDK_ROOT)/components/ble/ble_services/ble_rscs_c \
   $(SDK_ROOT)/components/drivers_nrf/uart \
+  $(SDK_ROOT)/components/drivers_nrf/saadc \
   $(SDK_ROOT)/components/ble/common \
   $(SDK_ROOT)/components/ble/ble_services/ble_lls \
   $(SDK_ROOT)/components/drivers_nrf/wdt \
@@ -148,7 +151,7 @@ LIB_FILES += \
 
 # C flags common to all targets
 CFLAGS += -DNRF52
-#CFLAGS += -DDEBUG_MODE
+CFLAGS += -DDEBUG_MODE
 CFLAGS += -DBOARD_PCA10040
 CFLAGS += -DNRF52832
 CFLAGS += -DNRF52_PAN_64

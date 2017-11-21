@@ -31,6 +31,7 @@
 #include "nrf_temp.h"
 #include "user_command.h"
 #include "user_storage2.h"
+#include "nrf_drv_saadc.h"
 #include "global.h"
 
 //user_ble_device_manage_t m_device_manager;
@@ -44,7 +45,7 @@ APP_TIMER_DEF(m_request_time_stamp_timer_id);
 
 
 #define DEVICE_NAME_PREX                     "DRUID_"                               /**< Name of device. Will be included in the advertising data. */
-#define DEVICE_NAME                     "DRUID_AAAAAAAAAAAA_1F40"                               /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "DRUID_AAAAAAAAAAAA_1F4021"                               /**< Name of device. Will be included in the advertising data. */
 #if (NRF_SD_BLE_API_VERSION == 3)
 #define NRF_BLE_MAX_MTU_SIZE            GATT_MTU_SIZE_DEFAULT                       /**< MTU size used in the softdevice enabling and to reply to a BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST event. */
 #endif
@@ -67,7 +68,11 @@ APP_TIMER_DEF(m_request_time_stamp_timer_id);
 #define NEXT_CONN_PARAMS_UPDATE_DELAY   APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER) /**< Time between each call to sd_ble_gap_conn_param_update after the first call (30 seconds). */
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
+#ifdef DEBUG_MODE
+#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#else
 #define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(1800*1000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#endif
 #define LED_MEAS_INTERVAL     APP_TIMER_TICKS(1500, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #define BEEP_MEAS_INTERVAL     APP_TIMER_TICKS(1, APP_TIMER_PRESCALER) / 5  /**< Battery level measurement interval (ticks). */
 #define TIME_STAMP_REQUEST_MEAS_INTERVAL     APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER)   /**< Battery level measurement interval (ticks). */
@@ -329,13 +334,13 @@ static void services_init(void)
 uint8_t device_name_str[] = DEVICE_NAME;
 static void advertising_init(void);
 //void user_app_update_device_name(char *temp_humidity)
-void user_app_update_device_name(uint8_t temp, uint8_t humidity)
+void user_app_update_device_name(uint8_t temp, uint8_t humidity, uint8_t battery_level)
 {
     if (!is_ble_connected)
     {
         uint32_t err_code;
-        sprintf((char *)(device_name_str + 19), "%02X%02X", temp, humidity);
-        //LOG_INFO("%s",device_name_str);
+        sprintf((char *)(device_name_str + 19), "%02X%02X%02X", temp, humidity, battery_level);
+        LOG_INFO("DEVICE NAMEIS :%s",device_name_str);
         ble_gap_conn_sec_mode_t sec_mode;
         BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
 
@@ -466,20 +471,20 @@ static void beep_timeout_handler(void *p_context)
     {
         if (beep_count % 2)
         {
-            nrf_gpio_pin_clear(22);
-            nrf_gpio_pin_set(23);
+            nrf_gpio_pin_clear(USER_PIN_BEEP_1);
+            nrf_gpio_pin_set(USER_PIN_BEEP_2);
         }
         else
         {
-            nrf_gpio_pin_set(22);
-            nrf_gpio_pin_clear(23);
+            nrf_gpio_pin_set(USER_PIN_BEEP_1);
+            nrf_gpio_pin_clear(USER_PIN_BEEP_2);
         }
     }
     
     else
     {
-        nrf_gpio_pin_set(22);
-        nrf_gpio_pin_set(23);
+        nrf_gpio_pin_set(USER_PIN_BEEP_1);
+        nrf_gpio_pin_set(USER_PIN_BEEP_2);
     }
 
     beep_count++;
@@ -549,7 +554,7 @@ void timers_beep_stop()
     nrf_gpio_pin_set(22);
     nrf_gpio_pin_set(23);
     */
-    is_ble_connected = true;
+    //is_ble_connected = true;
 }
 
 void timers_time_stamp_request_start()
@@ -562,13 +567,34 @@ void timers_time_stamp_request_stop()
     app_timer_stop(m_request_time_stamp_timer_id);
 }
 
+#include "nrf_gpio.h"
+static nrf_drv_saadc_event_handler_t adc_handler(nrf_drv_saadc_evt_t const *pevent)
+{
+
+}
+static void adc_init(void)
+{
+    nrf_gpio_cfg_output(6);
+    ret_code_t err_code = nrf_drv_saadc_init(NULL, adc_handler);
+    APP_ERROR_CHECK(err_code);
+
+    nrf_saadc_channel_config_t config = NRF_DRV_SAADC_DEFAULT_CHANNEL_CONFIG_SE(NRF_SAADC_INPUT_AIN3);
+    //config.gain = NRF_SAADC_GAIN1_6;
+    config.gain = NRF_SAADC_GAIN1_3;
+    //config.gain = NRF_SAADC_GAIN1;
+    err_code = nrf_drv_saadc_channel_init(NRF_SAADC_INPUT_AIN3, &config);
+    APP_ERROR_CHECK(err_code);
+
+}
 
 void user_app_init(void)
 {
     uint32_t err_code;
     nrf_temp_init();
-    //uart_init();
+    uart_init();
     nrf_drv_gpiote_init();
+
+    adc_init();
 
     ble_stack_init();
     

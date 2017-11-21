@@ -201,16 +201,17 @@ int main(void)
     
     //nrf_gpio_pin_clear(LED_4);
 
-    nrf_gpio_cfg_output(29);
-    nrf_gpio_pin_clear(29);
+    nrf_gpio_cfg_output(USER_PIN_LED);
     //nrf_gpio_pin_clear(29);
-    nrf_gpio_pin_set(29);
+    //nrf_gpio_pin_clear(29);
+    nrf_gpio_pin_set(USER_PIN_LED);
+    LOG_INFO("Start");
     //printf("start\r\n");
-    nrf_gpio_cfg_output(22);
-    nrf_gpio_cfg_output(23);
+    nrf_gpio_cfg_output(USER_PIN_BEEP_1);
+    nrf_gpio_cfg_output(USER_PIN_BEEP_2);
     
     nrf_gpio_cfg(
-        22,
+        USER_PIN_BEEP_1,
         NRF_GPIO_PIN_DIR_OUTPUT,
         NRF_GPIO_PIN_INPUT_DISCONNECT,
         NRF_GPIO_PIN_NOPULL,
@@ -218,15 +219,15 @@ int main(void)
         NRF_GPIO_PIN_NOSENSE);
 
         nrf_gpio_cfg(
-            23,
+            USER_PIN_BEEP_2,
             NRF_GPIO_PIN_DIR_OUTPUT,
             NRF_GPIO_PIN_INPUT_DISCONNECT,
             NRF_GPIO_PIN_NOPULL,
             NRF_GPIO_PIN_H0H1,
             NRF_GPIO_PIN_NOSENSE);
 
-        nrf_gpio_pin_clear(22);
-        nrf_gpio_pin_clear(23);
+        nrf_gpio_pin_clear(USER_PIN_BEEP_1);
+        nrf_gpio_pin_clear(USER_PIN_BEEP_2);
 
     
     //LOG_INFO("PETS_PROJ START");
@@ -271,7 +272,6 @@ int main(void)
             */
         }
 #endif
-
         user_process();
         power_manage();
     }

@@ -168,7 +168,7 @@ void find_current_write_pos()
 void user_storage2_store_a_record(user_flash_structure_t * data)
 {
     find_current_write_pos();
-    //LOG_INFO("Current pos is:%X--[%X]", user_storage_info.p_current_write_addr, *(user_storage_info.p_current_write_addr));
+    LOG_INFO("Current pos is:%X--[%X]", user_storage_info.p_current_write_addr, *(user_storage_info.p_current_write_addr));
     fs_call_back_flag = false;
     fs_store(&data_fs_config, user_storage_info.p_current_write_addr, data, 2, NULL);
     while(!fs_call_back_flag)

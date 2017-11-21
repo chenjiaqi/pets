@@ -15,6 +15,12 @@
 
 
  #define USER_PIN_LED 29
+ #define USER_PIN_BEEP_1 7
+ #define USER_PIN_BEEP_2 8
+ #define USER_PIN_BATTERY 5
+
+ #define CONVERT_MAX_VALUE     580
+ #define BATTERY_INITIAL_VALUE 33
 
  typedef struct cmd_struct
  {

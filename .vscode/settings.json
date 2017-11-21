@@ -38,7 +38,8 @@
         "user_storage2.h": "c",
         "sdk_config.h": "c",
         "sdk_errors.h": "c",
-        "ble_advdata.h": "c"
+        "ble_advdata.h": "c",
+        "nrf_drv_saadc.h": "c"
     },
     "files.encoding": "utf8",
     "files.exclude": {

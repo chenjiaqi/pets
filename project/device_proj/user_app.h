@@ -19,7 +19,7 @@ void timers_led_start();
 void timers_led_stop();
 void timers_beep_start();
 void timers_beep_stop();
-void user_app_update_device_name(uint8_t temp, uint8_t humidity);
+void user_app_update_device_name(uint8_t temp, uint8_t humidity, uint8_t battery_level);
 void timers_time_stamp_request_stop();
 void timers_time_stamp_request_start();
 

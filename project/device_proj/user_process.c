@@ -22,6 +22,7 @@
 #include "ble_advertising.h"
 #include "global.h"
 #include "nrf_gpio.h"
+#include "nrf_drv_saadc.h"
 /**@brief Function for User Process
  *
  * @details Deal with user process
@@ -115,6 +116,14 @@ extern void power_manage();
 extern bool is_need_read;
 extern void advertising_init();
 
+uint8_t get_battery_level(int16_t value)
+{
+    if (value <= 0)
+    {
+        return 0;
+    }
+    return (value / ((CONVERT_MAX_VALUE / BATTERY_INITIAL_VALUE + 1))) + 1;
+}
 
 void user_process(void)
 {
@@ -129,49 +138,7 @@ void user_process(void)
         }
         //user_storage2_test_set_read_addr();
         uint32_t count = user_storage2_get_record_count();
-        //LOG_INFO("Record is: %d", count);
 
-
-        //user_app_update_device_name(0x33, 0x44);
-        //user_storage2_register_device();
-        //start_to_trans_data_fo_app();
-        //user_storage_get_a_record();
-//        uint32_t * p = user_storage_get_current_read_position();
-//        LOG_INFO("Current read pos is %X",LOG_UINT(p));
-//        user_storage_set_has_been_transformed(p,user_storage_get_current_write_position());
-        
-
-#if 0
-        LOG_PROC("--->","START");
-        uint32_t err_code;
-        static uint8_t data[16];
-        for(int j = 0; j < 100; j++)
-        {
-        for(int i = 0; i < 10; i++)
-        {
-            
-            err_code = user_ble_device_manage_cmd_rsp_send(&m_device_manager,(uint8_t *) fs_config.p_start_addr, 16);
-            //err_code = user_ble_device_manage_cmd_rsp_send(&m_device_manager,(uint8_t *) data, 16);
-            //LOG_ERROR("%X", err_code);
-            while(err_code != NRF_SUCCESS)
-            {
-                //err_code = user_ble_device_manage_cmd_rsp_send(&m_device_manager,(uint8_t *) data, 16);
-                err_code = user_ble_device_manage_cmd_rsp_send(&m_device_manager,(uint8_t *) fs_config.p_start_addr, 16);
-                if(err_code == NRF_ERROR_INVALID_STATE)
-                {
-                    is_need_read_flash = false;
-                    LOG_PROC("Stop","stop");
-                    
-                    return;
-                }
-            }
-//            while(user_ble_device_manage_cmd_rsp_send(&m_device_manager,(uint8_t *) fs_config.p_start_addr, 16))
-//            {
-//                LOG_ERROR("%d");
-//            }
-        }
-        }
-#endif
         is_need_read_flash = false;
 
     }
@@ -179,37 +146,6 @@ void user_process(void)
     {
         is_need_acquire_temp = true;
         is_need_write_flash = false;
-#if 0
-        uint32_t err_code;
-        static int current_pos = 0;
-
-        LOG_INFO("write flash");
-
-        LOG_INFO("%x", fs_config.p_start_addr);
-        fs_call_back_flag = false;
-
-        /*
-        err_code = fs_erase(&fs_config,fs_config.p_start_addr,1,NULL);
-        printf("%d", err_code);
-
-        while(!fs_call_back_flag)
-        {
-            power_manage();
-        }
-        */
-        LOG_INFO("erase success");
-        fs_call_back_flag = true;
-        fs_store(&fs_config, fs_config.p_start_addr + current_store_flash_point, &current_pos,1, NULL);
-        while(!fs_call_back_flag)
-        {
-            power_manage();
-        }
-        LOG_INFO("write success");
-        current_pos++;
-        is_need_write_flash = false;
-        
-#endif
-    //is_need_acquire_temp = true;
     }
 
     if (is_need_acquire_temp)
@@ -230,13 +166,12 @@ void user_process(void)
 #endif
 
         is_need_acquire_temp = false;
-        if (count)
+        if (count % 2)
         {
             user_flash_struct.temperture1 = value.temperatureH;
             user_flash_struct.humidity1 = value.humidityH;
             LOG_PROC("WRITE","Write flash");
             user_storage2_store_a_record(&user_flash_struct);
-            
         }
         else
         {
@@ -245,14 +180,24 @@ void user_process(void)
             user_flash_struct.time_stamp = current_time_stamp;
         }
 
-        LOG_PROC("INFO", "%u:HUMIDITY:%d.%d, TEMPERTURE:%d.%d",LOG_UINT(current_time_stamp),LOG_UINT(value.humidityH), LOG_UINT(value.humidityL),
-        LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL));
-        //user_store_to_flash(&user_flash_struct);
+        static int16_t battery_level;
+        static uint8_t battery;
+
+        if(count % 64 == 0)
+        {
+            nrf_gpio_pin_clear(6);
+            nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level);
+            nrf_gpio_pin_set(6);
+        }
+
+        LOG_PROC("INFO", "%u:HUMIDITY:%d.%d, TEMPERTURE:%d.%d, %d",LOG_UINT(current_time_stamp),LOG_UINT(value.humidityH), LOG_UINT(value.humidityL),
+        LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL), battery_level);
 
         user_ble_temp_humidity_update(&m_device_manager,value.temperatureH,value.humidityH);
-        user_app_update_device_name(value.temperatureH, value.humidityH);
+        battery = get_battery_level(battery_level);
+        user_app_update_device_name(value.temperatureH, value.humidityH, battery);
         
-        count = ~count;
+        count++;
     }
 
     if(is_need_read)
@@ -269,20 +214,6 @@ void user_process(void)
         is_need_read = false;
     }
 
-    /*
-    if (test_information_count > 0)
-    {
-        
-        static uint32_t temp_data[] = {0x59f89e00,0x00000018,0x59f89f00,0x00000019};
-        temp_data[0]  = current_time_stamp;
-        temp_data[2] = current_time_stamp + 1800;
-        static uint8_t temp[17];
-        temp[0] = 0x05;
-        memcpy(temp+1, temp_data, 16);
-        user_ble_device_manage_cmd_rsp_send(&m_device_manager,&temp,17);
-        test_information_count --;
-    }
-    */
     if (is_need_trans_temp_info)
     {
         if(is_ble_connected)
@@ -331,10 +262,11 @@ void user_process(void)
 
     if (is_need_turn_on_led)
     {
-        nrf_gpio_pin_clear(29);
+        LOG_INFO("turn on led");
+        nrf_gpio_pin_clear(USER_PIN_LED);
         nrf_gpio_pin_clear(20);
-        nrf_delay_ms(10);
-        nrf_gpio_pin_set(29);
+        nrf_delay_ms(5);
+        nrf_gpio_pin_set(USER_PIN_LED);
         nrf_gpio_pin_set(20);
         is_need_turn_on_led = false;
     }
@@ -363,8 +295,8 @@ void user_process(void)
 
     if (is_beep_stopped)
     {
-        nrf_gpio_pin_set(22);
-        nrf_gpio_pin_set(23);
+        nrf_gpio_pin_set(USER_PIN_BEEP_1);
+        nrf_gpio_pin_set(USER_PIN_BEEP_2);
         is_beep_stopped = false;
     }
 }

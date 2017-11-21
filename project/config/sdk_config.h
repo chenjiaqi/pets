@@ -1037,7 +1037,7 @@
 // <e> SAADC_ENABLED - nrf_drv_saadc - SAADC peripheral driver
 //==========================================================
 #ifndef SAADC_ENABLED
-#define SAADC_ENABLED 0
+#define SAADC_ENABLED 1
 #endif
 #if  SAADC_ENABLED
 // <o> SAADC_CONFIG_RESOLUTION  - Resolution
@@ -2289,6 +2289,19 @@
 #endif
 
 #endif //NRF_LOG_ENABLED
+
+
+
+
+/*
+#define SAADC_ENABLED 1
+
+#if (SAADC_ENABLED == 1)
+#define SAADC_CONFIG_RESOLUTION      NRF_SAADC_RESOLUTION_10BIT
+#define SAADC_CONFIG_OVERSAMPLE      NRF_SAADC_OVERSAMPLE_DISABLED
+#define SAADC_CONFIG_IRQ_PRIORITY    APP_IRQ_PRIORITY_LOW
+#endif
+*/
 // </e>
 
 // </h> 
