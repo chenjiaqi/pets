@@ -23,6 +23,8 @@ bool is_ble_connected_event_come = false;
 
 bool is_ble_disconnected_event_come = false;
 
+bool is_lis3dh_int_come = false;
+
 bool is_beep_stopped = true;
 
 

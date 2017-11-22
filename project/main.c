@@ -611,7 +611,7 @@ int main(void)
     user_uart_init();
     nrf_drv_gpiote_init();
 
-    buttons_leds_init(&erase_bonds);
+    //buttons_leds_init(&erase_bonds);
     ble_stack_init();
 //    gap_params_init();
     user_ble_gap_init();

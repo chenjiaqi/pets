@@ -17,16 +17,16 @@ extern "C" {
 #endif
 
 // LEDs definitions for PCA10040
-#define LEDS_NUMBER    4
+#define LEDS_NUMBER    1
 
-#define LED_START      17
-#define LED_1          17
+#define LED_START      29
+#define LED_1          29
 #define LED_2          18
 #define LED_3          19
 #define LED_4          20
 #define LED_STOP       20
 
-#define LEDS_LIST { LED_1, LED_2, LED_3, LED_4 }
+#define LEDS_LIST { LED_1}
 
 #define BSP_LED_0      LED_1
 #define BSP_LED_1      LED_2
@@ -42,17 +42,17 @@ extern "C" {
 /* all LEDs are lit when GPIO is low */
 #define LEDS_INV_MASK  LEDS_MASK
 
-#define BUTTONS_NUMBER 4
+#define BUTTONS_NUMBER 1
 
-#define BUTTON_START   13
-#define BUTTON_1       13
+#define BUTTON_START   31
+#define BUTTON_1       31
 #define BUTTON_2       14
 #define BUTTON_3       15
 #define BUTTON_4       16
 #define BUTTON_STOP    16
 #define BUTTON_PULL    NRF_GPIO_PIN_PULLUP
 
-#define BUTTONS_LIST { BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4 }
+#define BUTTONS_LIST { BUTTON_1}
 
 #define BSP_BUTTON_0   BUTTON_1
 #define BSP_BUTTON_1   BUTTON_2

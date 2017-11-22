@@ -18,9 +18,12 @@
  #define USER_PIN_BEEP_1 7
  #define USER_PIN_BEEP_2 8
  #define USER_PIN_BATTERY 5
+ #define LIS3DH_INT1_PIN 11
+ #define LIS3DH_INT2_PIN 12
 
  #define CONVERT_MAX_VALUE     580
  #define BATTERY_INITIAL_VALUE 33
+ 
 
  typedef struct cmd_struct
  {
@@ -57,6 +60,7 @@ extern bool is_ble_disconnected_event_come;
 extern bool is_beep_stopped;
 
 extern uint32_t request_info_count;
+extern bool is_lis3dh_int_come;
 
 
 

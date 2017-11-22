@@ -31,6 +31,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/drivers_nrf/uart/nrf_drv_uart.c \
   $(SDK_ROOT)/components/drivers_nrf/saadc/nrf_drv_saadc.c \
   $(SDK_ROOT)/components/drivers_nrf/hal/nrf_saadc.c \
+  $(SDK_ROOT)/components/drivers_nrf/spi_master/nrf_drv_spi.c \
   $(PROJ_DIR)/../bsp/bsp.c \
   $(PROJ_DIR)/../bsp/bsp_btn_ble.c \
   $(PROJ_DIR)/main.c \
@@ -40,6 +41,7 @@ SRC_FILES += \
   $(PROJ_DIR)/user_command.c \
   $(PROJ_DIR)/user_process.c \
   $(PROJ_DIR)/user_storage2.c \
+  $(PROJ_DIR)/lis3dh.c \
   $(SDK_ROOT)/components/ble/common/ble_advdata.c \
   $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \
   $(SDK_ROOT)/components/ble/common/ble_conn_params.c \
@@ -80,6 +82,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/ble/ble_services/ble_rscs_c \
   $(SDK_ROOT)/components/drivers_nrf/uart \
   $(SDK_ROOT)/components/drivers_nrf/saadc \
+  $(SDK_ROOT)/components/drivers_nrf/spi_master \
   $(SDK_ROOT)/components/ble/common \
   $(SDK_ROOT)/components/ble/ble_services/ble_lls \
   $(SDK_ROOT)/components/drivers_nrf/wdt \
@@ -152,6 +155,7 @@ LIB_FILES += \
 # C flags common to all targets
 CFLAGS += -DNRF52
 CFLAGS += -DDEBUG_MODE
+CFLAGS += -DCONFIG_NFCT_PINS_AS_GPIOS
 CFLAGS += -DBOARD_PCA10040
 CFLAGS += -DNRF52832
 CFLAGS += -DNRF52_PAN_64
@@ -166,7 +170,7 @@ CFLAGS += -DNRF52_PAN_51
 CFLAGS += -DNRF52_PAN_36
 CFLAGS += -DNRF52_PAN_53
 CFLAGS += -DS132
-CFLAGS += -DCONFIG_GPIO_AS_PINRESET
+#CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DBLE_STACK_SUPPORT_REQD
 CFLAGS += -DNRF_SD_BLE_API_VERSION=3
 CFLAGS += -DSWI_DISABLE0
@@ -205,7 +209,7 @@ ASMFLAGS += -DNRF52_PAN_51
 ASMFLAGS += -DNRF52_PAN_36
 ASMFLAGS += -DNRF52_PAN_53
 ASMFLAGS += -DS132
-ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
+#ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
 ASMFLAGS += -DBLE_STACK_SUPPORT_REQD
 ASMFLAGS += -DNRF_SD_BLE_API_VERSION=3
 ASMFLAGS += -DSWI_DISABLE0
@@ -255,6 +259,9 @@ flash_softdevice:
 	@echo Flashing: s132_nrf52_3.0.0_softdevice.hex
 	nrfjprog --program $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_3.0.0_softdevice.hex -f nrf52 --chiperase 
 	nrfjprog --reset -f nrf52
+
+erase:
+	nrfjprog -f nrf52 --eraseall
 
 reset:
 	@echo reset

@@ -189,9 +189,9 @@ int main(void)
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
 
     //buttons_leds_init(&erase_bonds);
-
-    nrf_gpio_cfg_output(LED_4);
-    nrf_gpio_pin_set(LED_4);
+#if 1
+    //nrf_gpio_cfg_output(LED_4);
+    //nrf_gpio_pin_set(LED_4);
     user_app_init();
     //nrf_gpio_cfg_default(5);
     //nrf_gpio_cfg_default(7);
@@ -201,10 +201,12 @@ int main(void)
     
     //nrf_gpio_pin_clear(LED_4);
 
-    nrf_gpio_cfg_output(USER_PIN_LED);
+    //nrf_gpio_cfg_output(USER_PIN_LED);
     //nrf_gpio_pin_clear(29);
     //nrf_gpio_pin_clear(29);
-    nrf_gpio_pin_set(USER_PIN_LED);
+    //nrf_gpio_pin_clear(USER_PIN_LED);
+    //nrf_delay_ms(1000);
+    //nrf_gpio_pin_set(USER_PIN_LED);
     LOG_INFO("Start");
     //printf("start\r\n");
     nrf_gpio_cfg_output(USER_PIN_BEEP_1);
@@ -232,15 +234,36 @@ int main(void)
     
     //LOG_INFO("PETS_PROJ START");
     // Enter main loop.
+#if 0
     uint8_t addr_str[(BLE_GAP_ADDR_LEN << 1) + 1];
     user_get_mac_address_str(addr_str);
     //LOG_INFO("MAC ADDRESS is %s", addr_str);
+#endif
     
    //nrf_gpio_pin_clear(29); 
-
+#endif
     for (;;)
     {
-        
+
+#if 0
+        static uint8_t test_count = 0;
+        nrf_gpio_pin_clear(USER_PIN_LED);
+        nrf_delay_ms(1000);
+        nrf_gpio_pin_set(USER_PIN_LED);
+        nrf_delay_ms(1000);
+        test_count++;
+        if(test_count % 3 == 0)
+        {
+
+            nrf_gpio_pin_clear(USER_PIN_LED);
+            nrf_delay_ms(3000);
+            nrf_gpio_pin_set(USER_PIN_LED);
+            //power_manage();
+            sleep_mode_enter();
+            nrf_delay_ms(1000);
+        }
+#endif
+
 #if 0
         uint8_t m=180;
         uint32_t count = 0;
@@ -272,6 +295,7 @@ int main(void)
             */
         }
 #endif
+
         user_process();
         power_manage();
     }

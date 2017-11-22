@@ -124,6 +124,7 @@ uint8_t get_battery_level(int16_t value)
     }
     return (value / ((CONVERT_MAX_VALUE / BATTERY_INITIAL_VALUE + 1))) + 1;
 }
+extern void sleep_mode_enter();
 
 void user_process(void)
 {
@@ -196,8 +197,22 @@ void user_process(void)
         user_ble_temp_humidity_update(&m_device_manager,value.temperatureH,value.humidityH);
         battery = get_battery_level(battery_level);
         user_app_update_device_name(value.temperatureH, value.humidityH, battery);
+
+        lis3dh_test();
         
         count++;
+        if (count % 3 == 0 &&0)
+        {
+
+            //timers_time_stamp_request_stop();
+            //timers_stop();
+            LOG_PROC("SLEEP","Enter SLeep Mode");
+            nrf_gpio_pin_clear(USER_PIN_LED);
+            nrf_delay_ms(50);
+            nrf_gpio_pin_set(USER_PIN_LED);
+            sleep_mode_enter();
+
+        }
     }
 
     if(is_need_read)
@@ -298,5 +313,12 @@ void user_process(void)
         nrf_gpio_pin_set(USER_PIN_BEEP_1);
         nrf_gpio_pin_set(USER_PIN_BEEP_2);
         is_beep_stopped = false;
+    }
+
+    if (is_lis3dh_int_come)
+    {
+        LOG_INFO("LIS3DH int come");
+        is_lis3dh_int_come = false;
+        ble_advertising_start(BLE_ADV_MODE_FAST);
     }
 }
