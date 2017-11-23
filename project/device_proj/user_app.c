@@ -56,7 +56,7 @@ APP_TIMER_DEF(m_request_time_stamp_timer_id);
 #define CENTRAL_LINK_COUNT              0                                           /**< Number of central links used by the application. When changing this number remember to adjust the RAM settings*/
 #define PERIPHERAL_LINK_COUNT           1                                           /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
 #define APP_ADV_INTERVAL                1600                                          /**< The advertising interval (in units of 0.625 ms. This value corresponds to 40 ms). */
-#define APP_ADV_TIMEOUT_IN_SECONDSS     0                                         /**< The advertising timeout (in units of seconds). */
+#define APP_ADV_TIMEOUT_IN_SECONDSS     5                                         /**< The advertising timeout (in units of seconds). */
 
 #define APP_TIMER_PRESCALER             0                                           /**< Value of the RTC1 PRESCALER register. */
 #define APP_TIMER_OP_QUEUE_SIZE         4                                           /**< Size of timer operation queues. */
@@ -109,7 +109,6 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
         break;
     case BLE_ADV_EVT_IDLE:
         LOG_PROC("SLEEP", "ENTER SLEEP MODE");
-        //sleep_mode_enter1();
         sd_power_system_off();
         break;
     default:
@@ -240,7 +239,7 @@ static void uart_init(void)
         {
 //            RX_PIN_NUMBER,
 //            TX_PIN_NUMBER,
-            22,
+            31,
             23,
             RTS_PIN_NUMBER,
             CTS_PIN_NUMBER,
@@ -365,7 +364,7 @@ static void gap_params_init(void)
     err_code = user_get_mac_address_str((uint8_t *)(device_name_str + strlen(DEVICE_NAME_PREX)));
 
     APP_ERROR_CHECK(err_code);
-    sprintf((char *)(device_name_str + 18), "%s", "_163D");
+    sprintf((char *)(device_name_str + 18), "%s", "_160021");
     //LOG_PROC("NAME", "%s", device_name_str);
 
     err_code = sd_ble_gap_device_name_set(&sec_mode,
@@ -408,7 +407,8 @@ static void advertising_init(void)
     memset(&options, 0, sizeof(options));
     options.ble_adv_fast_enabled = true;
     options.ble_adv_fast_interval = APP_ADV_INTERVAL;
-    options.ble_adv_fast_timeout = APP_ADV_TIMEOUT_IN_SECONDSS;
+    //options.ble_adv_fast_timeout = APP_ADV_TIMEOUT_IN_SECONDSS;
+    options.ble_adv_fast_timeout = app_adv_timeout_in_seconds;
 
     err_code = ble_advertising_init(&advdata, &scanrsp, &options, on_adv_evt, NULL);
     APP_ERROR_CHECK(err_code);
@@ -542,7 +542,6 @@ void timers_stop()
 
 void timers_beep_start()
 {
-    //app_timer_start(m_beep_timer_id,LED_ME);
     app_timer_start(m_beep_timer_id, BEEP_MEAS_INTERVAL, NULL);
 }
 
@@ -562,7 +561,7 @@ void timers_time_stamp_request_stop()
 }
 
 #include "nrf_gpio.h"
-static nrf_drv_saadc_event_handler_t adc_handler(nrf_drv_saadc_evt_t const *pevent)
+static void adc_handler(nrf_drv_saadc_evt_t const *pevent)
 {
 
 }
@@ -580,56 +579,72 @@ static void adc_init(void)
     APP_ERROR_CHECK(err_code);
 
 }
+/*
 static void gpiote_evt_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
     is_lis3dh_int_come = true;
     nrf_gpio_pin_toggle(USER_PIN_LED);
 }
+*/
 
 static void lis3dh_interrupt_init()
 {
-#if 0 
-    nrf_drv_gpiote_in_config_t config = GPIOTE_CONFIG_IN_SENSE_TOGGLE(false);
-    //config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
-    config.sense = NRF_GPIOTE_POLARITY_HITOLO;
-    config.pull = NRF_GPIO_PIN_PULLDOWN;
-    //config.pull = NRF_GPIO_PIN_PULLDOWN;
-    config.pull = NRF_GPIO_PIN_NOPULL;
-    nrf_drv_gpiote_in_init(LIS3DH_INT1_PIN, &config, gpiote_evt_handler);
-    nrf_drv_gpiote_in_event_enable(LIS3DH_INT1_PIN, true);
-
-    config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
-    config.pull = NRF_GPIO_PIN_PULLUP;
-    config.pull = NRF_GPIO_PIN_NOPULL;
-    nrf_drv_gpiote_in_init(LIS3DH_INT2_PIN, &config, gpiote_evt_handler);
-    nrf_drv_gpiote_in_event_enable(LIS3DH_INT2_PIN, true);
-#endif
-    //nrf_gpio_cfg_sense_input(22, NRF_GPIO_PIN_NOPULL,NRF_GPIO_PIN_SENSE_LOW);
     nrf_gpio_cfg_sense_input(LIS3DH_INT1_PIN, NRF_GPIO_PIN_PULLUP,NRF_GPIO_PIN_SENSE_HIGH);
-
 }
 
 void user_app_init(void)
 {
     uint32_t err_code;
     nrf_temp_init();
-    //uart_init();
+#ifdef DEBUG_MODE
+    uart_init();
+#endif
     nrf_drv_gpiote_init();
     adc_init();
+
     ble_stack_init();
+
     gap_params_init();
+
     services_init();
-    advertising_init();
-    conn_params_init();
+
     user_storage2_init();
-    err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
-    APP_ERROR_CHECK(err_code);
+
     timers_init();
-    //nrf_gpio_cfg_sense_input(22,NRF_GPIO_PIN_NOPULL, NRF_GPI, GPIO_PIN_CNF_SENSE_Low);
-    //lis3dh_init();
-    //lis3dh_interrupt_init();
-    //timers_start();
+
+
     is_device_registered = user_storage2_is_device_registered();
+
+    if(is_device_registered)
+    {
+        LOG_INFO("REGISTERD");
+        app_adv_timeout_in_seconds = 0;
+    }
+    else
+    {
+        LOG_INFO("NOT REGISTERD");
+        app_adv_timeout_in_seconds = 10;
+        timers_led_start();
+    }
+
+    advertising_init();
+
+    conn_params_init();
+
+    
+
+    err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
+
+    APP_ERROR_CHECK(err_code);
+
+    
+//    nrf_gpio_cfg_sense_input(22,NRF_GPIO_PIN_NOPULL,  GPIO_PIN_CNF_SENSE_Low);
+
+    lis3dh_init();
+
+    lis3dh_interrupt_init();
+
+    
     if (is_device_registered)
     {
         timers_start();

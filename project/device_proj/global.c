@@ -34,6 +34,8 @@ uint32_t current_store_flash_point = 0;
 
 uint32_t test_information_count = 0;
 
+uint32_t app_adv_timeout_in_seconds = 10;
+
 command_info_t command_info = {
     .is_need_deal = false
 };

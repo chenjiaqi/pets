@@ -64,6 +64,8 @@ extern bool is_beep_stopped;
 extern uint32_t request_info_count;
 extern bool is_lis3dh_int_come;
 
+extern uint32_t app_adv_timeout_in_seconds;
+
 
 
  #endif

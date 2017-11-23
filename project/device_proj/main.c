@@ -108,6 +108,7 @@ bool is_need_read_flash = false;
 
 void bsp_event_handler(bsp_event_t event)
 {
+    LOG_EVENT("...");
     uint32_t err_code;
     switch (event)
     {
@@ -118,6 +119,7 @@ void bsp_event_handler(bsp_event_t event)
         break;
 
     case BSP_EVENT_DISCONNECT:
+        LOG_EVENT("Disconnect");
         err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
         if (err_code != NRF_ERROR_INVALID_STATE)
         {
@@ -191,28 +193,13 @@ int main(void)
 
     //buttons_leds_init(&erase_bonds);
 #if 1
-    //nrf_gpio_cfg_output(LED_4);
-    //nrf_gpio_pin_set(LED_4);
     user_app_init();
-    //nrf_gpio_cfg_default(5);
-    //nrf_gpio_cfg_default(7);
-
-    //nrf_gpio_pin_clear(LED_4);
-
-    
-    //nrf_gpio_pin_clear(LED_4);
-
     nrf_gpio_cfg_output(USER_PIN_LED);
     nrf_gpio_pin_set(USER_PIN_LED);
-    //nrf_gpio_pin_clear(29);
-    //nrf_gpio_pin_clear(29);
-    //nrf_gpio_pin_clear(USER_PIN_LED);
-    //nrf_delay_ms(1000);
-    //LOG_INFO("Start");
-    //printf("start\r\n");
+    LOG_INFO("Start");
     nrf_gpio_cfg_output(USER_PIN_BEEP_1);
     nrf_gpio_cfg_output(USER_PIN_BEEP_2);
-#if 1    
+#ifndef DEBUG_MODE    
     nrf_gpio_cfg(
         USER_PIN_BEEP_1,
         NRF_GPIO_PIN_DIR_OUTPUT,
@@ -234,7 +221,6 @@ int main(void)
 #endif
 
     
-    //LOG_INFO("PETS_PROJ START");
     // Enter main loop.
 #if 0
     uint8_t addr_str[(BLE_GAP_ADDR_LEN << 1) + 1];

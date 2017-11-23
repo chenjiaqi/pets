@@ -11,6 +11,7 @@
 #include "user_log.h"
 #include "nrf_delay.h"
 #include "nrf_drv_spi.h"
+#include "nrf_gpio.h"
 
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_LIS3DH_INSTANCE);  /**< SPI instance. */
 static uint8_t       m_tx_buf[2];           /**< TX buffer. */
@@ -48,28 +49,32 @@ void lis3dh_init()
     lis3dh_write_reg(0x20,0x1f);
     //lis3dh_write_reg(0x21,0x09);
     lis3dh_write_reg(0x21,0x01);
-    lis3dh_write_reg(0x22,0x40);
+    //lis3dh_write_reg(0x22,0x40);
+    lis3dh_write_reg(0x22,0x40 | 0x80);
     lis3dh_write_reg(0x23,0x00);
 
     //lis3dh_write_reg(0x24,0x08);
     lis3dh_write_reg(0x24,0x00);
-    lis3dh_write_reg(0x32,0x35);
+    lis3dh_write_reg(0x32,0x25); // 0x35 is default
+
+#if 0
+    lis3dh_write_reg(0x38, 0x20);
+    lis3dh_write_reg(0x3a, 0x10);
+#endif
+
     //lis3dh_write_reg(0x31,0x7f);
     lis3dh_write_reg(0x33,0x00);
     lis3dh_read_reg(0x26, NULL);
     //lis3dh_write_reg(0x30, 0x2a);
     lis3dh_write_reg(0x30, 0xaa);
 
-    //LIS3DH_SetODR(LIS3DH_ODR_100Hz);
-    //LIS3DH_SetMode(LIS3DH_NORMAL);
-    //LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);
-    //LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE);
-    /*
-    LIS3DH_SetODR(LIS3DH_ODR_100Hz);
-    LIS3DH_SetMode(LIS3DH_NORMAL);
-    LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);
-    LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE);
-    */
+    /** <Stop SPI save energy> */
+    nrf_drv_spi_uninit(&spi);
+    nrf_gpio_cfg_default(SPI_LIS3DH_SS_PIN);
+    nrf_gpio_cfg_default(SPI_LIS3DH_MISO_PIN);
+    nrf_gpio_cfg_default(SPI_LIS3DH_MISO_PIN);
+    nrf_gpio_cfg_default(SPI_LIS3DH_SCK_PIN);
+
 }
 
 void lis3dh_read_reg(uint8_t reg, uint8_t *data)

@@ -171,7 +171,7 @@ void user_process(void)
         {
             user_flash_struct.temperture1 = value.temperatureH;
             user_flash_struct.humidity1 = value.humidityH;
-            //LOG_PROC("WRITE","Write flash");
+            LOG_PROC("WRITE","Write flash");
             user_storage2_store_a_record(&user_flash_struct);
         }
         else
@@ -191,28 +191,17 @@ void user_process(void)
             nrf_gpio_pin_set(6);
         }
 
-        //LOG_PROC("INFO", "%u:HUMIDITY:%d.%d, TEMPERTURE:%d.%d, %d",LOG_UINT(current_time_stamp),LOG_UINT(value.humidityH), LOG_UINT(value.humidityL),
-        //LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL), battery_level);
+        LOG_PROC("INFO", "%u:HUMIDITY:%d.%d, TEMPERTURE:%d.%d, %d",LOG_UINT(current_time_stamp),LOG_UINT(value.humidityH), LOG_UINT(value.humidityL),
+        LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL), battery_level);
 
         user_ble_temp_humidity_update(&m_device_manager,value.temperatureH,value.humidityH);
         battery = get_battery_level(battery_level);
         user_app_update_device_name(value.temperatureH, value.humidityH, battery);
 
+        count ++;
+
         //lis3dh_test();
         
-        count++;
-        if (count % 3 == 0 &&0)
-        {
-
-            //timers_time_stamp_request_stop();
-            //timers_stop();
-            LOG_PROC("SLEEP","Enter SLeep Mode");
-            nrf_gpio_pin_clear(USER_PIN_LED);
-            nrf_delay_ms(50);
-            nrf_gpio_pin_set(USER_PIN_LED);
-            sleep_mode_enter();
-
-        }
     }
 
     if(is_need_read)
@@ -252,7 +241,7 @@ void user_process(void)
             }
             else
             {
-                //LOG_INFO("Trans info %d", count);
+                LOG_INFO("Trans info %d", count);
                 is_need_trans_temp_info = false;
                 count = 0;
                 request_info_count = 128;
@@ -296,8 +285,9 @@ void user_process(void)
 
     if (is_ble_connected_event_come)
     {
-        timers_time_stamp_request_start();
+        //timers_time_stamp_request_start();
         is_ble_connected_event_come = false;
+        timers_led_stop();
     }
 
     if (is_ble_disconnected_event_come)
