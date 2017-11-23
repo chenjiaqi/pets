@@ -1,0 +1,73 @@
+// A very simple protocol definition, consisting of only
+// one message.
+
+syntax = "proto2";
+
+enum State
+{
+    E_ON = 1;
+    E_OFF = 0;
+}
+
+enum Command
+{
+    E_CMD_AUTH = 1;
+    E_CMD_REGISTER = 2;
+    E_CMD_UNREGISTER = 3;
+    E_CMD_LED = 4;
+    E_CMD_BEEP = 5;
+}
+
+enum CommandResp
+{
+    E_CMD_RESP_AUTH = 1;
+    E_CMD_RESP_REGISTER = 2;
+    E_CMD_RESP_UNREGISTER = 3;
+    E_CMD_RESP_LED = 4;
+    E_CME_RESP_BEEP = 5;
+}
+
+
+enum FrameType
+{
+    E_FRAME_REQUEST = 1;
+    E_FRAME_RESPONSE = 2;
+}
+
+enum RespCode
+{
+    E_RESP_CODE_SUCCESS = 0;
+    E_RESP_CODE_FAILED = 1;
+}
+
+
+message StoreInformation
+{
+    required fixed32 timestamp = 1;
+    optional uint32 temperture = 2;
+    optional uint32 humidity = 3;
+}
+
+message TransInformation
+{
+    repeated StoreInformation info = 1;
+}
+
+message DeviceInfo
+{
+    required string device_id = 1;
+    optional State led_status = 2;
+    optional State beep_status = 3;
+    optional bool is_registered = 4;
+}
+
+message RequestMessage 
+{
+    required FrameType frametype = 1;
+    optional Command cmd = 2;
+    optional CommandResp cmd_resp = 3;
+    optional bytes params = 4;
+}
+
+
+

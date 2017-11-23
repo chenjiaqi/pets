@@ -113,7 +113,8 @@ void bsp_event_handler(bsp_event_t event)
     {
     case BSP_EVENT_SLEEP:
         LOG_PROC("EVENT", "SLEEP ENTER");
-        sleep_mode_enter();
+        //sleep_mode_enter();
+        sd_power_system_off();
         break;
 
     case BSP_EVENT_DISCONNECT:
@@ -201,17 +202,17 @@ int main(void)
     
     //nrf_gpio_pin_clear(LED_4);
 
-    //nrf_gpio_cfg_output(USER_PIN_LED);
+    nrf_gpio_cfg_output(USER_PIN_LED);
+    nrf_gpio_pin_set(USER_PIN_LED);
     //nrf_gpio_pin_clear(29);
     //nrf_gpio_pin_clear(29);
     //nrf_gpio_pin_clear(USER_PIN_LED);
     //nrf_delay_ms(1000);
-    //nrf_gpio_pin_set(USER_PIN_LED);
-    LOG_INFO("Start");
+    //LOG_INFO("Start");
     //printf("start\r\n");
     nrf_gpio_cfg_output(USER_PIN_BEEP_1);
     nrf_gpio_cfg_output(USER_PIN_BEEP_2);
-    
+#if 1    
     nrf_gpio_cfg(
         USER_PIN_BEEP_1,
         NRF_GPIO_PIN_DIR_OUTPUT,
@@ -230,6 +231,7 @@ int main(void)
 
         nrf_gpio_pin_clear(USER_PIN_BEEP_1);
         nrf_gpio_pin_clear(USER_PIN_BEEP_2);
+#endif
 
     
     //LOG_INFO("PETS_PROJ START");

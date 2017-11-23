@@ -154,7 +154,7 @@ LIB_FILES += \
 
 # C flags common to all targets
 CFLAGS += -DNRF52
-CFLAGS += -DDEBUG_MODE
+#CFLAGS += -DDEBUG_MODE
 CFLAGS += -DCONFIG_NFCT_PINS_AS_GPIOS
 CFLAGS += -DBOARD_PCA10040
 CFLAGS += -DNRF52832
@@ -266,4 +266,9 @@ erase:
 reset:
 	@echo reset
 	nrfjprog --reset -f nrf52
+
+messages:
+	@echo build proto
+	protoc --plugin=protoc-gen-nanopb=D:\nanopb-0.3.9-windows-x86\generator/protoc-gen-nanopb.bat --nanopb_out=. $(PROJ_DIR)/proto/messages.proto
+
 

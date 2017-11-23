@@ -171,7 +171,7 @@ void user_process(void)
         {
             user_flash_struct.temperture1 = value.temperatureH;
             user_flash_struct.humidity1 = value.humidityH;
-            LOG_PROC("WRITE","Write flash");
+            //LOG_PROC("WRITE","Write flash");
             user_storage2_store_a_record(&user_flash_struct);
         }
         else
@@ -191,14 +191,14 @@ void user_process(void)
             nrf_gpio_pin_set(6);
         }
 
-        LOG_PROC("INFO", "%u:HUMIDITY:%d.%d, TEMPERTURE:%d.%d, %d",LOG_UINT(current_time_stamp),LOG_UINT(value.humidityH), LOG_UINT(value.humidityL),
-        LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL), battery_level);
+        //LOG_PROC("INFO", "%u:HUMIDITY:%d.%d, TEMPERTURE:%d.%d, %d",LOG_UINT(current_time_stamp),LOG_UINT(value.humidityH), LOG_UINT(value.humidityL),
+        //LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL), battery_level);
 
         user_ble_temp_humidity_update(&m_device_manager,value.temperatureH,value.humidityH);
         battery = get_battery_level(battery_level);
         user_app_update_device_name(value.temperatureH, value.humidityH, battery);
 
-        lis3dh_test();
+        //lis3dh_test();
         
         count++;
         if (count % 3 == 0 &&0)
@@ -270,14 +270,14 @@ void user_process(void)
 
     if (command_info.is_need_deal)
     {
-        LOG_PROC("CMD","%d, %d",command_info.command, command_info.params_length);
+        //LOG_PROC("CMD","%d, %d",command_info.command, command_info.params_length);
         deal_width_command(command_info.command, command_info.params, command_info.params_length);
         command_info.is_need_deal = false;
     }
 
     if (is_need_turn_on_led)
     {
-        LOG_INFO("turn on led");
+        //LOG_INFO("turn on led");
         nrf_gpio_pin_clear(USER_PIN_LED);
         nrf_gpio_pin_clear(20);
         nrf_delay_ms(5);
@@ -300,12 +300,12 @@ void user_process(void)
         is_ble_connected_event_come = false;
     }
 
-    if (is_ble_connected_event_come)
+    if (is_ble_disconnected_event_come)
     {
         timers_time_stamp_request_stop();
         timers_led_stop();
         timers_beep_stop();
-        is_ble_connected_event_come = false;
+        is_ble_disconnected_event_come = false;
     }
 
     if (is_beep_stopped)
@@ -317,7 +317,7 @@ void user_process(void)
 
     if (is_lis3dh_int_come)
     {
-        LOG_INFO("LIS3DH int come");
+        //LOG_INFO("LIS3DH int come");
         is_lis3dh_int_come = false;
         ble_advertising_start(BLE_ADV_MODE_FAST);
     }

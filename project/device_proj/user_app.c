@@ -83,7 +83,7 @@ static ble_uuid_t                       m_adv_uuids[] = {{USER_BLE_UUID_DEVICE_M
 
 
 
-void sleep_mode_enter(void)
+void sleep_mode_enter1(void)
 {
    uint32_t err_code = bsp_indication_set(BSP_INDICATE_IDLE);
     APP_ERROR_CHECK(err_code);
@@ -109,7 +109,8 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
         break;
     case BLE_ADV_EVT_IDLE:
         LOG_PROC("SLEEP", "ENTER SLEEP MODE");
-        sleep_mode_enter();
+        //sleep_mode_enter1();
+        sd_power_system_off();
         break;
     default:
         break;
@@ -603,8 +604,8 @@ static void lis3dh_interrupt_init()
     nrf_drv_gpiote_in_init(LIS3DH_INT2_PIN, &config, gpiote_evt_handler);
     nrf_drv_gpiote_in_event_enable(LIS3DH_INT2_PIN, true);
 #endif
-    //nrf_gpio_cfg_sense_input(LIS3DH_INT1_PIN, NRF_GPIO_PIN_PULLUP,NRF_GPIO_PIN_SENSE_LOW);
-    //nrf_gpio_cfg_sense_input(LIS3DH_INT1_PIN, NRF_GPIO_PIN_PULLUP,NRF_GPIO_PIN_SENSE_HIGH);
+    //nrf_gpio_cfg_sense_input(22, NRF_GPIO_PIN_NOPULL,NRF_GPIO_PIN_SENSE_LOW);
+    nrf_gpio_cfg_sense_input(LIS3DH_INT1_PIN, NRF_GPIO_PIN_PULLUP,NRF_GPIO_PIN_SENSE_HIGH);
 
 }
 
@@ -612,7 +613,7 @@ void user_app_init(void)
 {
     uint32_t err_code;
     nrf_temp_init();
-    uart_init();
+    //uart_init();
     nrf_drv_gpiote_init();
     adc_init();
     ble_stack_init();
@@ -624,7 +625,8 @@ void user_app_init(void)
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
     timers_init();
-    lis3dh_init();
+    //nrf_gpio_cfg_sense_input(22,NRF_GPIO_PIN_NOPULL, NRF_GPI, GPIO_PIN_CNF_SENSE_Low);
+    //lis3dh_init();
     //lis3dh_interrupt_init();
     //timers_start();
     is_device_registered = user_storage2_is_device_registered();

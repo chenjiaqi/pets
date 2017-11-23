@@ -45,7 +45,7 @@ void lis3dh_init()
     //lis3dh_write_reg(0x24,0x80);
     nrf_delay_ms(10);
     //lis3dh_write_reg(0x20,0x3f);
-    lis3dh_write_reg(0x20,0x2f);
+    lis3dh_write_reg(0x20,0x1f);
     //lis3dh_write_reg(0x21,0x09);
     lis3dh_write_reg(0x21,0x01);
     lis3dh_write_reg(0x22,0x40);
@@ -53,7 +53,7 @@ void lis3dh_init()
 
     //lis3dh_write_reg(0x24,0x08);
     lis3dh_write_reg(0x24,0x00);
-    lis3dh_write_reg(0x32,0x17);
+    lis3dh_write_reg(0x32,0x35);
     //lis3dh_write_reg(0x31,0x7f);
     lis3dh_write_reg(0x33,0x00);
     lis3dh_read_reg(0x26, NULL);
@@ -115,7 +115,7 @@ void lis3dh_test()
     x = ((x_h << 8) | x_l);
     y = ((y_h << 8) | y_l);
     z = ((z_h << 8) | z_l);
-    LOG_INFO("%d    %d   %d", x, y, z);
+    //LOG_INFO("%d    %d   %d", x, y, z);
 
 
 /*

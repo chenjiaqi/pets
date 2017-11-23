@@ -15,8 +15,10 @@
 
 
  #define USER_PIN_LED 29
- #define USER_PIN_BEEP_1 7
- #define USER_PIN_BEEP_2 8
+ #define USER_PIN_BEEP_1 22
+ #define USER_PIN_BEEP_2 23
+// #define USER_PIN_BEEP_1 7
+// #define USER_PIN_BEEP_2 8
  #define USER_PIN_BATTERY 5
  #define LIS3DH_INT1_PIN 11
  #define LIS3DH_INT2_PIN 12
