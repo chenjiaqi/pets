@@ -589,7 +589,8 @@ static void gpiote_evt_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t a
 
 static void lis3dh_interrupt_init()
 {
-    nrf_gpio_cfg_sense_input(LIS3DH_INT1_PIN, NRF_GPIO_PIN_PULLUP,NRF_GPIO_PIN_SENSE_HIGH);
+    //nrf_gpio_cfg_sense_input(LIS3DH_INT1_PIN, NRF_GPIO_PIN_PULLUP,NRF_GPIO_PIN_SENSE_HIGH);
+    nrf_gpio_cfg_sense_input(LIS3DH_INT1_PIN, NRF_GPIO_PIN_PULLDOWN,NRF_GPIO_PIN_SENSE_HIGH);
 }
 
 void user_app_init(void)

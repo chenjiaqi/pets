@@ -16,6 +16,7 @@ enum Command
     E_CMD_UNREGISTER = 3;
     E_CMD_LED = 4;
     E_CMD_BEEP = 5;
+    E_CMD_GET_DATA = 6;
 }
 
 enum CommandResp
@@ -25,6 +26,7 @@ enum CommandResp
     E_CMD_RESP_UNREGISTER = 3;
     E_CMD_RESP_LED = 4;
     E_CME_RESP_BEEP = 5;
+    E_CMD_RESP_GET_DATA = 6;
 }
 
 

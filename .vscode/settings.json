@@ -42,7 +42,12 @@
         "nrf_drv_saadc.h": "c",
         "nrf_assert.h": "c",
         "nrf_drv_common.h": "c",
-        "lis3dh.h": "c"
+        "lis3dh.h": "c",
+        "druid_frame.h": "c",
+        "messages.pb.h": "c",
+        "pb_decode.h": "c",
+        "pb_encode.h": "c",
+        "pb_common.h": "c"
     },
     "files.encoding": "utf8",
     "files.exclude": {

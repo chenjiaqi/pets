@@ -51,6 +51,7 @@
 #include "user_process.h"
 #include "nrf_delay.h"
 #include "global.h"
+#include "druid_frame.h"
 
 #define IS_SRVC_CHANGED_CHARACT_PRESENT 0 /**< Include the service_changed characteristic. If not enabled, the server's database cannot be changed for the lifetime of the device. */
 
@@ -283,6 +284,16 @@ int main(void)
             */
         }
 #endif
+
+#if 1
+        while(1)
+        {
+
+            druid_frame_test();
+            nrf_delay_ms(1000);
+        }
+#endif
+
 
         user_process();
         power_manage();

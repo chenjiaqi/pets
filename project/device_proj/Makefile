@@ -41,7 +41,12 @@ SRC_FILES += \
   $(PROJ_DIR)/user_command.c \
   $(PROJ_DIR)/user_process.c \
   $(PROJ_DIR)/user_storage2.c \
+  $(PROJ_DIR)/druid_frame.c \
+  $(PROJ_DIR)/proto/messages.pb.c \
   $(PROJ_DIR)/lis3dh.c \
+  $(SDK_ROOT)/external/nano-pb/pb_common.c \
+  $(SDK_ROOT)/external/nano-pb/pb_decode.c \
+  $(SDK_ROOT)/external/nano-pb/pb_encode.c \
   $(SDK_ROOT)/components/ble/common/ble_advdata.c \
   $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \
   $(SDK_ROOT)/components/ble/common/ble_conn_params.c \
@@ -55,9 +60,11 @@ SRC_FILES += \
 INC_FOLDERS += \
   $(PROJ_DIR)/../config \
   $(PROJ_DIR)/../LOG \
+  $(PROJ_DIR)/proto \
   $(SDK_ROOT)/user_ble_services/user_ble_device_manage \
   $(SDK_ROOT)/user_ble_services \
   $(SDK_ROOT)/user \
+  $(SDK_ROOT)/external/nano-pb \
   $(SDK_ROOT)/components/drivers_nrf/comp \
   $(SDK_ROOT)/components/drivers_nrf/twi_master \
   $(SDK_ROOT)/components/ble/ble_services/ble_ancs_c \
