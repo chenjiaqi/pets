@@ -158,8 +158,14 @@ uint32_t deal_width_command(uint8_t command, uint8_t * param, uint16_t len)
     }
     else
     {
+        
+        //LOG_INFO("SELF DISCONNECT");
+        //disconnect_current_connection();
+        is_auth_success = true;
+        /*
         resp_data[0]  = 0;
         user_ble_device_manage_cmd_rsp_send(&m_device_manager, &resp_data, 0);
+        */
     }
     return NRF_SUCCESS;
 }

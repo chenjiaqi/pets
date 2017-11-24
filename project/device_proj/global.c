@@ -30,6 +30,8 @@ bool is_beep_stopped = true;
 
 bool is_ble_connected = false;
 
+bool is_auth_success = false;
+
 uint32_t current_store_flash_point = 0;
 
 uint32_t test_information_count = 0;

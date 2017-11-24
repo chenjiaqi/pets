@@ -285,7 +285,7 @@ int main(void)
         }
 #endif
 
-#if 1
+#if 0
         while(1)
         {
 

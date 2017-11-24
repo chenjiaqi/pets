@@ -41,6 +41,7 @@ APP_TIMER_DEF(m_temp_acq_timer_id);
 APP_TIMER_DEF(m_led_timer_id);
 APP_TIMER_DEF(m_beep_timer_id);
 APP_TIMER_DEF(m_request_time_stamp_timer_id);
+APP_TIMER_DEF(m_auth_timer_id);
 
 
 
@@ -77,11 +78,22 @@ APP_TIMER_DEF(m_request_time_stamp_timer_id);
 #define LED_MEAS_INTERVAL     APP_TIMER_TICKS(1500, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #define BEEP_MEAS_INTERVAL     APP_TIMER_TICKS(1, APP_TIMER_PRESCALER) / 5  /**< Battery level measurement interval (ticks). */
 #define TIME_STAMP_REQUEST_MEAS_INTERVAL     APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER)   /**< Battery level measurement interval (ticks). */
+#define AUTH_MEAS_INTERVAL     APP_TIMER_TICKS(3000, APP_TIMER_PRESCALER)   /**< Battery level measurement interval (ticks). */
 
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
 static ble_uuid_t                       m_adv_uuids[] = {{USER_BLE_UUID_DEVICE_MANAGE_SERVICE,0x01}};  /**< Universally unique service identifier. */
 
 
+void disconnect_current_connection()
+{
+    uint32_t err_code;
+    err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+    if (err_code != NRF_ERROR_INVALID_STATE)
+    {
+        APP_ERROR_CHECK(err_code);
+    }
+    //m_conn_handle = BLE_CONN_HANDLE_INVALID;
+}
 
 void sleep_mode_enter1(void)
 {
@@ -145,6 +157,7 @@ static void on_ble_evt(ble_evt_t *p_ble_evt)
         APP_ERROR_CHECK(err_code);
         m_conn_handle = BLE_CONN_HANDLE_INVALID;
         is_ble_connected = false;
+        is_ble_disconnected_event_come = true;
         timers_led_stop();
         timers_beep_stop();
         break; // BLE_GAP_EVT_DISCONNECTED
@@ -358,6 +371,8 @@ static void gap_params_init(void)
     uint32_t err_code;
     ble_gap_conn_params_t gap_conn_params;
     ble_gap_conn_sec_mode_t sec_mode;
+    int16_t battery_level;
+    uint8_t battery;
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
 
@@ -366,6 +381,13 @@ static void gap_params_init(void)
     APP_ERROR_CHECK(err_code);
     sprintf((char *)(device_name_str + 18), "%s", "_160021");
     //LOG_PROC("NAME", "%s", device_name_str);
+    nrf_gpio_pin_clear(6);
+    nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level);
+    nrf_gpio_pin_set(6);
+
+    battery = get_battery_level(battery_level);
+    sprintf((char *)(device_name_str + 23), "%02X", battery);
+
 
     err_code = sd_ble_gap_device_name_set(&sec_mode,
                                           (const uint8_t *)device_name_str,
@@ -497,6 +519,14 @@ static void time_stamp_request_timeout_handler(void *p_context)
     //LOG_INFO("Time stamp request");
 }
 
+static void auth_timeout_handler(void *p_context)
+{
+    if(!is_auth_success)
+    {
+        disconnect_current_connection();
+    }
+}
+
 void timers_init()
 {
     uint32_t err_code;
@@ -511,6 +541,9 @@ void timers_init()
     APP_ERROR_CHECK(err_code);
 
     err_code = app_timer_create(&m_request_time_stamp_timer_id, APP_TIMER_MODE_REPEATED, time_stamp_request_timeout_handler);
+    APP_ERROR_CHECK(err_code);
+
+    err_code = app_timer_create(&m_auth_timer_id, APP_TIMER_MODE_SINGLE_SHOT, auth_timeout_handler);
     APP_ERROR_CHECK(err_code);
 
 }
@@ -532,7 +565,6 @@ void timers_led_start()
 void timers_led_stop()
 {
     app_timer_stop(m_led_timer_id);
-    
 }
 
 void timers_stop()
@@ -553,6 +585,11 @@ void timers_beep_stop()
 void timers_time_stamp_request_start()
 {
     app_timer_start(m_request_time_stamp_timer_id, TIME_STAMP_REQUEST_MEAS_INTERVAL, NULL);
+}
+
+void timer_auth_start()
+{
+    app_timer_start(m_auth_timer_id, AUTH_MEAS_INTERVAL, NULL);
 }
 
 void timers_time_stamp_request_stop()
@@ -601,6 +638,7 @@ void user_app_init(void)
     uart_init();
 #endif
     nrf_drv_gpiote_init();
+
     adc_init();
 
     ble_stack_init();
@@ -645,7 +683,7 @@ void user_app_init(void)
 
     lis3dh_interrupt_init();
 
-    
+    //app_timer_start(m_auth_timer_id, AUTH_MEAS_INTERVAL, NULL);
     if (is_device_registered)
     {
         timers_start();

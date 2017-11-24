@@ -5,7 +5,7 @@
 #define PAGE_NUM 8
 #define PAGE_SIZE 1024
 
-static bool fs_call_back_flag = false;
+volatile static bool fs_call_back_flag = false;
 
 static user_storage2_t user_storage_info;
 
@@ -90,9 +90,23 @@ bool user_storage2_register_device()
 
 bool user_storage2_unregister_device()
 {
-    LOG_PROC("REGISTER","ENTER");
+    LOG_PROC("UN REGISTER","ENTER");
     fs_call_back_flag = false;
     fs_erase(&info_fs_config, info_fs_config.p_start_addr, 1,NULL);
+    while(fs_call_back_flag == false)
+    {
+        power_manage();
+    }
+    fs_call_back_flag = false;
+
+    fs_erase(&data_fs_config, data_fs_config.p_start_addr, 1,NULL);
+    while(fs_call_back_flag == false)
+    {
+        power_manage();
+    }
+    LOG_PROC("REGISTER","OVER");
+ 
+
     return true;
 }
 
@@ -113,7 +127,7 @@ void find_current_write_pos()
     uint32_t * p_write = user_storage_info.p_current_write_addr;
     if ((!IS_CURRENT_WRITE_REACH_END) && CURRENT_REL_WRITE_POS % 1024 == 0)
     {
-        while(*(p_write) != 0xffffffff && *(p_write + PAGE_SIZE) != 0xffffffff)
+        while(*(p_write) != 0xffffffff && *(p_write + PAGE_SIZE - 2) != 0xffffffff)
         {
             p_write = p_write + PAGE_SIZE;
             if (p_write == user_storage_info.p_end_addr)

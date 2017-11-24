@@ -61,6 +61,8 @@ extern bool is_ble_disconnected_event_come;
 
 extern bool is_beep_stopped;
 
+extern bool is_auth_success;
+
 extern uint32_t request_info_count;
 extern bool is_lis3dh_int_come;
 

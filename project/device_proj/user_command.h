@@ -17,6 +17,7 @@ typedef enum e_user_command
     E_CMD_GET_TEMP_HUMITY, // 5
     E_CMD_UNREGISTER,// 6
     E_CMD_REQUIRE_REGISTER, //7
+    E_CMD_SELF_DISCONNECT, //7
     E_CMD_MAX //7
 }user_command_t;
 
