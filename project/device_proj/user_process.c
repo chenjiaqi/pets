@@ -287,7 +287,7 @@ void user_process(void)
     {
         //timers_time_stamp_request_start();
         //app_timer_start(m_auth_timer_id, AUTH_MEAS_INTERVAL, NULL);
-        timer_auth_start();
+        //timer_auth_start();
         is_ble_connected_event_come = false;
         timers_led_stop();
     }
