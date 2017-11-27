@@ -1,0 +1,2 @@
+RespGetDeviceParams.device_id max_size:24
+RequestMessage.params max_size:128

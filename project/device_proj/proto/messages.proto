@@ -1,75 +1,102 @@
 // A very simple protocol definition, consisting of only
 // one message.
+// ver 1.0
+// modify 2017/11/27/19:36
 
 syntax = "proto2";
 
-enum State
+enum TwoState
 {
-    E_ON = 1;
-    E_OFF = 0;
+    E_ON =              1;
+    E_OFF =             0;
+}
+
+enum Retcode
+{
+    SUCCESSED =         0;
+    Failed  =           1;
 }
 
 enum Command
 {
-    E_CMD_AUTH = 1;
-    E_CMD_REGISTER = 2;
-    E_CMD_UNREGISTER = 3;
-    E_CMD_LED = 4;
-    E_CMD_BEEP = 5;
-    E_CMD_GET_DATA = 6;
+    E_CMD_AUTH =                1;
+    E_CMD_REGISTER =            2;
+    E_CMD_UNREGISTER =          3;
+    E_CMD_LED =                 4;
+    E_CMD_BEEP =                5;
+    E_CMD_GET_STORE_DATA =      6;
+    E_CMD_GET_DEVICE_INFO =     7;
 }
 
 enum CommandResp
 {
-    E_CMD_RESP_AUTH = 1;
-    E_CMD_RESP_REGISTER = 2;
-    E_CMD_RESP_UNREGISTER = 3;
-    E_CMD_RESP_LED = 4;
-    E_CME_RESP_BEEP = 5;
-    E_CMD_RESP_GET_DATA = 6;
+    E_CMD_RESP_AUTH =               1;
+    E_CMD_RESP_REGISTER =           2;
+    E_CMD_RESP_UNREGISTER =         3;
+    E_CMD_RESP_LED =                4;
+    E_CMD_RESP_BEEP =               5;
+    E_CMD_RESP_GET_STORE_DATA =     6;
+    E_CMD_RESP_GET_DEVICE_INFO =    7;
 }
 
+// auth params
+message CmdRespAuthParams
+{
+    required fixed32 timestamp =    1;
+    required fixed32 random =       2;
+    required fixed32 random2 =      3; 
+    required fixed32 random3 =      4; 
+}
+
+// for beep led
+message CmdTwoStateParams
+{
+    required TwoState state = 1;
+}
+
+// register  unregister led beep 
+
+message RespCommonParams
+{
+    required Retcode retcode = 1;
+}
 
 enum FrameType
 {
-    E_FRAME_REQUEST = 1;
-    E_FRAME_RESPONSE = 2;
+    E_FRAME_REQUEST =       1;
+    E_FRAME_RESPONSE =      2;
 }
 
 enum RespCode
 {
-    E_RESP_CODE_SUCCESS = 0;
-    E_RESP_CODE_FAILED = 1;
+    E_RESP_CODE_SUCCESS =   0;
+    E_RESP_CODE_FAILED =    1;
 }
-
 
 message StoreInformation
 {
     required fixed32 timestamp = 1;
-    optional uint32 temperture = 2;
-    optional uint32 humidity = 3;
+    optional int32 temperture = 2;
+    optional int32 humidity =   3;
 }
 
-message TransInformation
+message RespGetdataParams
 {
     repeated StoreInformation info = 1;
 }
 
-message DeviceInfo
+message RespGetDeviceParams
 {
-    required string device_id = 1;
-    optional State led_status = 2;
-    optional State beep_status = 3;
-    optional bool is_registered = 4;
+    required bytes device_id =          1;
+    optional TwoState led_status =      2;
+    optional TwoState beep_status =     3;
+    optional bool is_registered =       4;
 }
 
 message RequestMessage 
 {
-    required FrameType frametype = 1;
-    optional Command cmd = 2;
+    required FrameType frametype =  1;
+    optional Command cmd =          2;
     optional CommandResp cmd_resp = 3;
-    optional bytes params = 4;
+    optional bytes params =         4;
 }
-
-
-

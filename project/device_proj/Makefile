@@ -42,11 +42,13 @@ SRC_FILES += \
   $(PROJ_DIR)/user_process.c \
   $(PROJ_DIR)/user_storage2.c \
   $(PROJ_DIR)/druid_frame.c \
+  $(PROJ_DIR)/model_test.c \
   $(PROJ_DIR)/proto/messages.pb.c \
   $(PROJ_DIR)/lis3dh.c \
   $(SDK_ROOT)/external/nano-pb/pb_common.c \
   $(SDK_ROOT)/external/nano-pb/pb_decode.c \
   $(SDK_ROOT)/external/nano-pb/pb_encode.c \
+  $(SDK_ROOT)/external/tiny-AES128/aes.c \
   $(SDK_ROOT)/components/ble/common/ble_advdata.c \
   $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \
   $(SDK_ROOT)/components/ble/common/ble_conn_params.c \
@@ -154,14 +156,15 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/softdevice/common/softdevice_handler \
   $(SDK_ROOT)/components/ble/ble_services/ble_hrs \
   $(SDK_ROOT)/components/libraries/log/src \
-  $(SDK_ROOT)/components/libraries/log
+  $(SDK_ROOT)/components/libraries/log \
+  $(SDK_ROOT)/external/tiny-AES128
 
 # Libraries common to all targets
 LIB_FILES += \
 
 # C flags common to all targets
 CFLAGS += -DNRF52
-#CFLAGS += -DDEBUG_MODE
+CFLAGS += -DDEBUG_MODE
 CFLAGS += -DCONFIG_NFCT_PINS_AS_GPIOS
 CFLAGS += -DBOARD_PCA10040
 CFLAGS += -DNRF52832
