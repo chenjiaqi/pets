@@ -11,12 +11,6 @@ enum TwoState
     E_OFF =             0;
 }
 
-enum Retcode
-{
-    SUCCESSED =         0;
-    Failed  =           1;
-}
-
 enum Command
 {
     E_CMD_AUTH =                1;
@@ -56,15 +50,17 @@ message CmdTwoStateParams
 
 // register  unregister led beep 
 
+/*
 message RespCommonParams
 {
     required Retcode retcode = 1;
 }
+*/
 
 enum FrameType
 {
-    E_FRAME_REQUEST =       1;
-    E_FRAME_RESPONSE =      2;
+    E_FRAME_TYPE_REQUEST =       1;
+    E_FRAME_TYPE_RESPONSE =      2;
 }
 
 enum RespCode

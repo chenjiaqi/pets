@@ -47,7 +47,9 @@
         "messages.pb.h": "c",
         "pb_decode.h": "c",
         "pb_encode.h": "c",
-        "pb_common.h": "c"
+        "pb_common.h": "c",
+        "frame_queue.h": "c",
+        "user_command_2.h": "c"
     },
     "files.encoding": "utf8",
     "files.exclude": {

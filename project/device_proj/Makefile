@@ -39,10 +39,12 @@ SRC_FILES += \
   $(PROJ_DIR)/user_app.c \
   $(PROJ_DIR)/global.c \
   $(PROJ_DIR)/user_command.c \
+  $(PROJ_DIR)/user_command_2.c \
   $(PROJ_DIR)/user_process.c \
   $(PROJ_DIR)/user_storage2.c \
   $(PROJ_DIR)/druid_frame.c \
   $(PROJ_DIR)/model_test.c \
+  $(PROJ_DIR)/frame_queue.c \
   $(PROJ_DIR)/proto/messages.pb.c \
   $(PROJ_DIR)/lis3dh.c \
   $(SDK_ROOT)/external/nano-pb/pb_common.c \

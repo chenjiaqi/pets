@@ -53,6 +53,7 @@ void user_storage2_init()
     user_storage_info.p_current_write_addr = data_fs_config.p_start_addr;
     user_storage_info.p_current_read_addr = data_fs_config.p_start_addr;
     //LOG_INFO("INFO:%X-->%X",LOG_UINT(info_fs_config.p_start_addr), LOG_UINT(info_fs_config.p_end_addr));
+    find_current_write_pos();
 }
 
 extern void power_manage();
@@ -90,7 +91,7 @@ bool user_storage2_register_device()
 
 bool user_storage2_unregister_device()
 {
-    LOG_PROC("UN REGISTER","ENTER");
+    LOG_PROC("UNREGISTER","ENTER");
     fs_call_back_flag = false;
     fs_erase(&info_fs_config, info_fs_config.p_start_addr, 1,NULL);
     while(fs_call_back_flag == false)
@@ -104,7 +105,12 @@ bool user_storage2_unregister_device()
     {
         power_manage();
     }
-    LOG_PROC("REGISTER","OVER");
+
+    user_storage_info.p_start_addr = data_fs_config.p_start_addr;
+    user_storage_info.p_end_addr = data_fs_config.p_end_addr;
+    user_storage_info.p_current_write_addr = data_fs_config.p_start_addr;
+    user_storage_info.p_current_read_addr = data_fs_config.p_start_addr;
+    LOG_PROC("UNREGISTER","OVER");
  
 
     return true;
@@ -252,7 +258,7 @@ uint32_t * user_storage2_get_a_record()
     {
         return NULL;
     }
-    user_storage_info.p_current_read_addr += 4;
+    user_storage_info.p_current_read_addr += 2;
 
     // reach the end of storage
     if(user_storage_info.p_current_read_addr == user_storage_info.p_end_addr)
@@ -264,12 +270,14 @@ uint32_t * user_storage2_get_a_record()
 
 uint32_t user_storage2_get_record_count()
 {
-    //LOG_INFO("Current read address is 0x%X", LOG_UINT(user_storage_info.p_current_read_addr));
+    //LOG_INFO("Current read address is 0x%X-%X:%d", LOG_UINT(user_storage_info.p_current_read_addr),
+    //LOG_UINT(user_storage_info.p_current_write_addr), (user_storage_info.p_current_write_addr - user_storage_info.p_current_read_addr));
     if(user_storage_info.p_current_read_addr <= user_storage_info.p_current_write_addr)
     {
-        return ((user_storage_info.p_current_write_addr - user_storage_info.p_current_read_addr) / 4);
+        //LOG_INFO("%d",((user_storage_info.p_current_write_addr - user_storage_info.p_current_read_addr) / 2));
+        return ((user_storage_info.p_current_write_addr - user_storage_info.p_current_read_addr) / 2);
     }
-    return (user_storage_info.p_current_write_addr - user_storage_info.p_start_addr + user_storage_info.p_end_addr - user_storage_info.p_current_read_addr) /4;
+    return (user_storage_info.p_current_write_addr - user_storage_info.p_start_addr + user_storage_info.p_end_addr - user_storage_info.p_current_read_addr) /2;
 }
 
 void user_storage2_test_set_read_addr()

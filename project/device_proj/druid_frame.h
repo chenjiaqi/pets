@@ -21,19 +21,27 @@ typedef struct _split_frame
     uint8_t split_frame[MAX_SPLIT_SIZE];
 }druid_split_frame_t;
 
+typedef struct _frame_head
+{
+    uint8_t seq;
+    uint8_t cmd;
+    uint16_t len;
+}druid_frame_head_t;
+
 typedef struct _trans_frame
 {
     uint8_t seq;
     uint8_t cmd;
     uint16_t len;
     uint8_t *p_data;
-}druid_trans_frame_t;
+}druid_frame_t;
 
-void druid_set_construct_trans_frame(druid_trans_frame_t frame);
-
+void druid_set_construct_trans_frame(druid_frame_t frame);
 
 void druid_set_split_frame(uint8_t const * p_data, uint16_t len);
 uint8_t *get_split_frame(uint16_t *length);
 void test_frame(uint8_t len);
 uint8_t * druid_construct_frame(const uint8_t *p_split_frame, uint8_t len);
+uint16_t druid_frame_get_frame_length();
+
 #endif

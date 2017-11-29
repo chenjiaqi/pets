@@ -15,10 +15,12 @@
 uint8_t const *p_data_start = NULL;
 uint8_t const *p_current = NULL;
 uint32_t left_len = 0;
+static uint16_t current_frame_length = 0;
 
 static uint8_t trans_frame_buf[MAX_FRAME_SIZE];
 
 static uint8_t recv_frame_buf[MAX_FRAME_SIZE];
+static uint8_t params_buf[MAX_FRAME_SIZE];
 static uint8_t split_recv_frame_buf;
 
 
@@ -125,7 +127,7 @@ void test_frame(uint8_t len)
 #endif
 }
 
-void druid_set_construct_trans_frame(druid_trans_frame_t frame)
+void druid_set_construct_trans_frame(druid_frame_t frame)
 {
     uint16_t len_trans = 0;
     trans_frame_buf[0] = frame.seq;
@@ -154,7 +156,7 @@ uint8_t *druid_construct_frame(const uint8_t *p_split_frame, uint8_t length)
     static uint8_t *p_current = NULL;
     static bool is_in_construct_mode = false;
 
-    uint8_t split_type = p_split_frame[0];
+    uint8_t split_type = p_split_frame[0] & 0x0f;
     switch(split_type)
     {
         case FRAME_TYPE_START:
@@ -163,6 +165,7 @@ uint8_t *druid_construct_frame(const uint8_t *p_split_frame, uint8_t length)
             memcpy(p_current, p_split_frame + 1, length - 1);// remove split information
             p_current = p_current + length  - 1;
             is_in_construct_mode = true;
+            current_frame_length = length - 1;
             break;
         }
 
@@ -172,8 +175,9 @@ uint8_t *druid_construct_frame(const uint8_t *p_split_frame, uint8_t length)
             {
                 memcpy(p_current, p_split_frame + 1, length - 1);// remove split information
                 p_current = p_current +length - 1;
+                current_frame_length += length-1;
 
-                if (p_current >= recv_frame_buf)
+                if (p_current >= recv_frame_buf +MAX_FRAME_SIZE)
                 {
                     is_in_construct_mode = false;
                 }
@@ -186,9 +190,15 @@ uint8_t *druid_construct_frame(const uint8_t *p_split_frame, uint8_t length)
             if(is_in_construct_mode)
             {
                 memcpy(p_current, p_split_frame + 1, length - 1);// remove split information
+                is_in_construct_mode = false;
+                is_complete = true;
+                current_frame_length += length - 1;
             }
-            is_in_construct_mode = false;
-            is_complete = true;
+            else
+            {
+                is_in_construct_mode = false;
+                is_complete = false;
+            }
             break;
         }
 
@@ -197,6 +207,7 @@ uint8_t *druid_construct_frame(const uint8_t *p_split_frame, uint8_t length)
             p_current = recv_frame_buf;
             memcpy(p_current, p_split_frame + 1, length - 1);// remove split information
             is_in_construct_mode = false;
+            current_frame_length = length - 1;
             is_complete = true;
             break;
         }
@@ -213,6 +224,39 @@ uint8_t *druid_construct_frame(const uint8_t *p_split_frame, uint8_t length)
     }
     return NULL;
 }
+
+uint16_t druid_frame_get_frame_length()
+{
+    return current_frame_length;
+}
+
+bool druid_frame_is_frame_valid(const uint8_t *frame, uint16_t length)
+{
+    bool ret = false;
+    druid_frame_head_t *p_frame_head = (druid_frame_head_t *)frame;
+    uint16_t *p_checksum = (uint16_t *)(frame + length - 2);
+    if((p_frame_head->len == length - 6) && ((*p_checksum) == 0xffff))
+    {
+        ret = true;
+    }
+    return ret;
+}
+
+druid_frame_t *druid_frame_get_frame_info(uint8_t *frame_buf, uint16_t length)
+{
+    static druid_frame_t frame;
+    uint16_t *p_checksum = (uint16_t *)(frame_buf + length - 2);
+    frame = *((druid_frame_t *)(frame_buf));
+    if((frame.len == length - 6) && ((*p_checksum) == 0xffff))
+    {
+        memcpy(params_buf, frame_buf + 4, frame.len);
+        frame.p_data = params_buf;
+        return &frame;
+    }
+    return NULL;
+}
+
+
 
 
 #if 0

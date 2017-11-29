@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-10-27 16:53:45 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-11-06 17:51:56
+ * @Last Modified time: 2017-11-28 13:54:14
  */
 #include "user_app.h"
 #include "bsp.h"
@@ -34,6 +34,8 @@
 #include "nrf_drv_saadc.h"
 #include "global.h"
 #include "lis3dh.h"
+#include "druid_frame.h"
+#include "frame_queue.h"
 
 //user_ble_device_manage_t m_device_manager;
 
@@ -71,7 +73,7 @@ APP_TIMER_DEF(m_auth_timer_id);
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
 #ifdef DEBUG_MODE
-#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(20000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #else
 #define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(1800*1000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #endif
@@ -307,25 +309,29 @@ static void ble_stack_init(void)
 
 static void user_ble_device_manage_data_handler(user_ble_device_manage_t *p_device_manage, uint8_t *p_data, uint16_t length)
 {
-#if 0
-    LOG_PROC("info", "this is call back, %d", p_data[0]);
-    if (p_data[0] == 0)
+#if 1
+    LOG_PROC("info", "this is call back, %d", length);
+    uint8_t *p_frame = druid_construct_frame(p_data, length);
+    if(p_frame)
     {
-        nrf_gpio_pin_set(LED_4);
-        nrf_gpio_pin_set(29);
+        uint16_t frame_length = druid_frame_get_frame_length();
+        frame_queue_put(p_frame, frame_length);
+        /*
+        LOG_INFO("received a frame %d", frame_length);
+        for(int i = 0; i <frame_length; i++)
+        {
+            printf("%02X ", p_frame[i]);
+        }
+        printf("\r\n");
+        */
     }
-    else
-    {
-        nrf_gpio_pin_clear(LED_4);
-        nrf_gpio_pin_clear(29);
-    }
-    user_ble_device_manage_cmd_rsp_send(&m_device_manager, p_data, 1);
-#endif
+#else
     //deal_width_command(p_data, length);
     command_info.command = p_data[0];
     command_info.is_need_deal = true;
     memcpy(command_info.params, p_data+1, length-1);
     command_info.params_length = length - 1;
+#endif
 }
 
 static void services_init(void)

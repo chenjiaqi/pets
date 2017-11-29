@@ -3,7 +3,7 @@
  * @Author: chenjiaqi@druid 
  * @Date: 2017-10-30 17:11:54 
  * @Last Modified by: chenjiaqi@druid
- * @Last Modified time: 2017-11-07 17:07:15
+ * @Last Modified time: 2017-11-29 13:48:59
  */
 #include "user_process.h"
 #include "user_log.h"
@@ -23,6 +23,10 @@
 #include "global.h"
 #include "nrf_gpio.h"
 #include "nrf_drv_saadc.h"
+#include "frame_queue.h"
+#include "druid_frame.h"
+#include "user_command_2.h"
+#include "user_app.h"
 /**@brief Function for User Process
  *
  * @details Deal with user process
@@ -126,8 +130,98 @@ uint8_t get_battery_level(int16_t value)
 }
 extern void sleep_mode_enter();
 
+static void deal_with_frame_from_queue()
+{
+    static uint8_t recv_frame[MAX_FRAME_SIZE];
+    uint16_t len = 0;
+    if(frame_queue_is_empty())
+    {
+        return;
+    }
+    len = frame_queue_get(recv_frame);
+
+    /*if(druid_frame_is_frame_valid(recv_frame, len))
+    {
+        LOG_INFO("valid");
+    }
+    else{
+        LOG_INFO("Invalid");
+    }*/
+    druid_frame_t *p_druid_frame = druid_frame_get_frame_info(recv_frame, len);
+    
+    if(p_druid_frame)
+    {
+        druid_frame_t resp_frame = {0};
+        uint8_t buf[256];
+        resp_frame.p_data = buf;
+        user_cmd_deal_with_process(p_druid_frame, &resp_frame);
+        
+        uint8_t len = 0;
+        //len = user_cmd_create_resp_package(CommandResp_E_CMD_RESP_GET_DEVICE_INFO, buf);
+        //len = user_cmd_create_cmd_package(CommandResp_E_CMD_RESP_AUTH, buf);
+        //len = user_cmd_create_cmd_package(Command_E_CMD_LED, buf);
+
+
+        druid_frame_t frame;
+        frame.seq = 0x01;
+        frame.cmd = 0x02;
+        frame.len = len;
+        frame.p_data = buf;
+        //druid_set_construct_trans_frame(frame);
+        druid_set_construct_trans_frame(resp_frame);
+        
+        uint8_t split_length = 0;
+        uint8_t *p_split_frame = NULL;
+        do{
+            //printf("\r\n");
+            p_split_frame = get_split_frame(&split_length);
+            if(p_split_frame)
+            {
+                uint32_t ret_code;
+                //ret_code = user_ble_device_manage_cmd_rsp_send(&m_device_manager, p_split_frame, split_length);
+                do{
+                ret_code = user_ble_device_manage_cmd_rsp_send(&m_device_manager, p_split_frame, split_length);
+            }while((ret_code !=NRF_SUCCESS) && (ret_code != NRF_ERROR_INVALID_STATE));
+                /*for(int i = 0; i <split_length; i++)
+                {
+                    printf("%02x ", p_split_frame[i]);
+                }
+                */
+            }
+        }while(p_split_frame);
+        printf("send over\r\n");
+
+
+        /*
+        LOG_INFO(" ");
+        for (int i = 0; i < len; i++)
+        {
+            printf("%02X ", buf[i]);
+        }
+        LOG_INFO(" ");
+        LOG_INFO("resp_package len is : %d", len);
+        */
+    }
+    else
+    {
+        LOG_INFO("invalid");
+    }
+
+#if 0 
+    LOG_INFO("deal with frame, length is %d", len);
+    LOG_INFO(" ");
+    for(int i = 0; i <len; i++)
+    {
+        printf("%02X ", recv_frame[i]);
+    }
+    LOG_INFO(" ");
+#endif
+}
+
 void user_process(void)
 {
+    deal_with_frame_from_queue();
+
     if(is_need_read_flash)
     {
         if (user_storage2_is_device_registered())

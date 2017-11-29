@@ -1,2 +1,3 @@
 RespGetDeviceParams.device_id max_size:24
-RequestMessage.params max_size:128
+RequestMessage.params max_size:230
+RespGetdataParams.info max_count: 20

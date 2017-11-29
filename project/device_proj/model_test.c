@@ -14,7 +14,7 @@ void test_druid_frame()
     {
         data[i] = i;
     }
-    druid_trans_frame_t frame;
+    druid_frame_t frame;
     frame.seq = 2;
     frame.cmd = 1;
     frame.len = 50;
@@ -74,6 +74,7 @@ void test_aes()
 void test_proto()
 {
     uint8_t buffer[128];
+    /*
     RespGetDeviceParams dev_info = RespGetDeviceParams_init_zero;
     dev_info.device_id.size = 10;
     dev_info.has_led_status = true;
@@ -83,4 +84,30 @@ void test_proto()
     pb_ostream_t ostream = pb_ostream_from_buffer(buffer, sizeof(buffer));
     pb_encode(&ostream, RespGetDeviceParams_fields, &dev_info);
     printf("%d\r\n", ostream.bytes_written);
+    */
+    uint16_t len ;
+    len = user_cmd_create_cmd_package(Command_E_CMD_GET_STORE_DATA,buffer);
+    
+    druid_frame_t frame;
+    frame.seq = 1;
+    frame.cmd = 1;
+    frame.len= len;
+    frame.p_data = buffer;
+
+    druid_set_construct_trans_frame(frame);
+    uint8_t *p_split_frame = NULL;
+    do
+    {
+        printf("\r\n");
+        uint16_t split_length;
+        p_split_frame = get_split_frame(&split_length);
+        if (p_split_frame)
+        {
+            for (int i = 0; i < split_length; i++)
+            {
+                printf("%02x ", p_split_frame[i]);
+            }
+        }
+    } while (p_split_frame);
+    printf("\r\n");
 }

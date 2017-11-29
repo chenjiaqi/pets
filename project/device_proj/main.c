@@ -286,7 +286,7 @@ int main(void)
         }
 #endif
 
-#if 1
+#if 0
         while(1)
         {
 
@@ -296,8 +296,6 @@ int main(void)
             nrf_delay_ms(3000);
         }
 #endif
-
-
         user_process();
         power_manage();
     }
