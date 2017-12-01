@@ -121,6 +121,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
         break;
     case BLE_ADV_EVT_IDLE:
         LOG_PROC("SLEEP", "ENTER SLEEP MODE");
+        nrf_gpio_pin_set(USER_PIN_LED);
         sd_power_system_off();
         break;
     default:
@@ -662,7 +663,7 @@ void user_app_init(void)
     else
     {
         LOG_INFO("NOT REGISTERD");
-        app_adv_timeout_in_seconds = 10;
+        app_adv_timeout_in_seconds = 30;
         timers_led_start();
     }
 
