@@ -50,6 +50,7 @@ void user_cmd_deal_with_process(const druid_frame_t *p_frame, druid_frame_t *p_r
             LOG_INFO("AUTH");
             if(message.has_params  &&message.params.size == 16)
             {
+
             }
             break;
         case Command_E_CMD_REGISTER:
