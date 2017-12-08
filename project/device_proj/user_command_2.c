@@ -13,6 +13,10 @@
 
 static bool is_operate_success = false;
 
+static CmdRespAuthParams auth_params;
+static CmdRespAuthParams resp_auth_params;
+#define KEY_PHARSE "mobile_aspirit_1"
+#define KEY_ENC    "hardware_aspirit"
 
 void user_cmd_deal_with_process(const druid_frame_t *p_frame, druid_frame_t *p_resp_frame)
 {
@@ -50,6 +54,13 @@ void user_cmd_deal_with_process(const druid_frame_t *p_frame, druid_frame_t *p_r
             LOG_INFO("AUTH");
             if(message.has_params  &&message.params.size == 16)
             {
+                CmdRespAuthParams *p_auth_params = (void *)message.params.bytes;
+                auth_params.timestamp = p_auth_params->timestamp;
+                auth_params.random= p_auth_params->random;
+                auth_params.random2= p_auth_params->random2;
+                auth_params.random3= p_auth_params->random3;
+                AES128_ECB_decrypt(&auth_params,KEY_PHARSE, &resp_auth_params);
+                AES128_ECB_encrypt(&resp_auth_params,KEY_ENC, &auth_params);
 
             }
             break;
@@ -181,6 +192,7 @@ uint16_t user_cmd_create_resp_package(CommandResp cmd_resp, uint8_t *p_dest)  //
         message.has_params = true;
         message.params.size = 16;
         message.params.bytes[0] = RespCode_E_RESP_CODE_SUCCESS;
+        memcpy(message.params.bytes, (uint8_t *)&auth_params, sizeof(resp_auth_params));
         break;
 
     case CommandResp_E_CMD_RESP_BEEP:
