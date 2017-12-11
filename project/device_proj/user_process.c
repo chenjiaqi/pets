@@ -189,7 +189,7 @@ static void deal_with_frame_from_queue()
                 */
             }
         }while(p_split_frame);
-        printf("send over\r\n");
+        //printf("send over\r\n");
 
 
         /*

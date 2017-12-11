@@ -199,7 +199,7 @@ int main(void)
     user_app_init();
     nrf_gpio_cfg_output(USER_PIN_LED);
     nrf_gpio_pin_set(USER_PIN_LED);
-    LOG_INFO("Start");
+    //LOG_INFO("Start");
     nrf_gpio_cfg_output(USER_PIN_BEEP_1);
     nrf_gpio_cfg_output(USER_PIN_BEEP_2);
 #ifndef DEBUG_MODE    
