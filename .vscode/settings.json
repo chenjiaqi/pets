@@ -49,7 +49,8 @@
         "pb_encode.h": "c",
         "pb_common.h": "c",
         "frame_queue.h": "c",
-        "user_command_2.h": "c"
+        "user_command_2.h": "c",
+        "aes.h": "c"
     },
     "files.encoding": "utf8",
     "files.exclude": {

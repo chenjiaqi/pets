@@ -17,6 +17,8 @@ static CmdRespAuthParams auth_params;
 static CmdRespAuthParams resp_auth_params;
 #define KEY_PHARSE "mobile_aspirit_1"
 #define KEY_ENC    "hardware_aspirit"
+ const char * key_pharse = "mobile_aspirit_1";
+ const char * key_enc = "hardware_aspirit";
 
 void user_cmd_deal_with_process(const druid_frame_t *p_frame, druid_frame_t *p_resp_frame)
 {
@@ -52,16 +54,34 @@ void user_cmd_deal_with_process(const druid_frame_t *p_frame, druid_frame_t *p_r
     {
         case Command_E_CMD_AUTH:
             LOG_INFO("AUTH");
-            if(message.has_params  &&message.params.size == 16)
+            if(message.has_params &&message.params.size >= 16)
             {
+                
                 CmdRespAuthParams *p_auth_params = (void *)message.params.bytes;
-                auth_params.timestamp = p_auth_params->timestamp;
-                auth_params.random= p_auth_params->random;
-                auth_params.random2= p_auth_params->random2;
-                auth_params.random3= p_auth_params->random3;
-                AES128_ECB_decrypt(&auth_params,KEY_PHARSE, &resp_auth_params);
-                AES128_ECB_encrypt(&resp_auth_params,KEY_ENC, &auth_params);
 
+                /*
+                p_auth_params->random = p_auth_params->random + 'D';
+                p_auth_params->random2 = p_auth_params->random2 + 'R';
+                p_auth_params->random3 = p_auth_params->random3 + 'U';
+                */
+
+                resp_auth_params.timestamp = p_auth_params->timestamp;
+                resp_auth_params.random= p_auth_params->random + 'D';
+                resp_auth_params.random2= p_auth_params->random2 + 'R';
+                resp_auth_params.random3= p_auth_params->random3 + 'U';
+
+                LOG_INFO("%08x", resp_auth_params.timestamp);
+                LOG_INFO("%d", resp_auth_params.random);
+                LOG_INFO("%d", resp_auth_params.random2);
+                LOG_INFO("%d", resp_auth_params.random3);
+                is_auth_success = true;
+
+#if 0
+                AES128_ECB_decrypt((uint8_t *)&auth_params,key_pharse, (uint8_t *)&resp_auth_params);
+                LOG_INFO("%08x", resp_auth_params.timestamp);
+                AES128_ECB_encrypt((uint8_t *)&resp_auth_params,key_enc, (uint8_t *)&auth_params);
+                LOG_INFO("%08x", auth_params.timestamp);
+#endif
             }
             break;
         case Command_E_CMD_REGISTER:
@@ -192,7 +212,7 @@ uint16_t user_cmd_create_resp_package(CommandResp cmd_resp, uint8_t *p_dest)  //
         message.has_params = true;
         message.params.size = 16;
         message.params.bytes[0] = RespCode_E_RESP_CODE_SUCCESS;
-        memcpy(message.params.bytes, (uint8_t *)&auth_params, sizeof(resp_auth_params));
+        memcpy(message.params.bytes, (uint8_t *)&resp_auth_params, sizeof(resp_auth_params));
         break;
 
     case CommandResp_E_CMD_RESP_BEEP:

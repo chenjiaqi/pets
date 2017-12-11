@@ -186,6 +186,7 @@ void power_manage(void)
 //extern user_ble_device_manage_t m_device_manager;
 /**@brief Application main function.
  */
+#include "aes.h"
 int main(void)
 {
     bool erase_bonds;
@@ -220,6 +221,25 @@ int main(void)
 
         nrf_gpio_pin_clear(USER_PIN_BEEP_1);
         nrf_gpio_pin_clear(USER_PIN_BEEP_2);
+#endif
+#if 0
+    static uint8_t plantext[32] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,};
+    static uint8_t key[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+    static uint8_t dest[] = {0,};
+    AES128_ECB_encrypt(plantext, key, dest);
+    for(int i = 0; i <32; i++)
+    {
+        printf("%02x ", dest[i]);
+    }
+    printf("\r\n");
+
+    AES128_ECB_decrypt(dest, key, plantext);
+    for(int i = 0; i <16; i++)
+    {
+        printf("%02x ", plantext[i]);
+    }
+    printf("\r\n");
+
 #endif
 
     

@@ -380,8 +380,9 @@ void user_process(void)
     if (is_ble_connected_event_come)
     {
         //timers_time_stamp_request_start();
+        is_auth_success = false;
         //app_timer_start(m_auth_timer_id, AUTH_MEAS_INTERVAL, NULL);
-        //timer_auth_start();
+        timer_auth_start();
         is_ble_connected_event_come = false;
         timers_led_stop();
     }

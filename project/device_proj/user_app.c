@@ -80,7 +80,7 @@ APP_TIMER_DEF(m_auth_timer_id);
 #define LED_MEAS_INTERVAL     APP_TIMER_TICKS(1500, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #define BEEP_MEAS_INTERVAL     APP_TIMER_TICKS(1, APP_TIMER_PRESCALER) / 5  /**< Battery level measurement interval (ticks). */
 #define TIME_STAMP_REQUEST_MEAS_INTERVAL     APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER)   /**< Battery level measurement interval (ticks). */
-#define AUTH_MEAS_INTERVAL     APP_TIMER_TICKS(3000, APP_TIMER_PRESCALER)   /**< Battery level measurement interval (ticks). */
+#define AUTH_MEAS_INTERVAL     APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER)   /**< Battery level measurement interval (ticks). */
 
 static uint16_t                         m_conn_handle = BLE_CONN_HANDLE_INVALID;    /**< Handle of the current connection. */
 static ble_uuid_t                       m_adv_uuids[] = {{USER_BLE_UUID_DEVICE_MANAGE_SERVICE,0x01}};  /**< Universally unique service identifier. */
@@ -256,7 +256,7 @@ static void uart_init(void)
 //            RX_PIN_NUMBER,
 //            TX_PIN_NUMBER,
             31,
-            23,
+            22,
             RTS_PIN_NUMBER,
             CTS_PIN_NUMBER,
             APP_UART_FLOW_CONTROL_DISABLED,
