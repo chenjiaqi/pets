@@ -117,6 +117,7 @@ void bsp_event_handler(bsp_event_t event)
     case BSP_EVENT_SLEEP:
         LOG_PROC("EVENT", "SLEEP ENTER");
         //sleep_mode_enter();
+        //nrf_gpio_pin_set();
         sd_power_system_off();
         break;
 
