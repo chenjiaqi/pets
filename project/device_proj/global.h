@@ -68,6 +68,8 @@ extern bool is_lis3dh_int_come;
 
 extern uint32_t app_adv_timeout_in_seconds;
 
+extern bool is_current_connection_registered;
+
 
 
  #endif

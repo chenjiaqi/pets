@@ -397,6 +397,12 @@ void user_process(void)
             LOG_INFO("should enter sleep");
             sd_power_system_off();
         }
+
+        if(is_current_connection_registered)
+        {
+            user_advertising_init();
+            is_current_connection_registered = false;
+        }
         is_ble_disconnected_event_come = false;
     }
 

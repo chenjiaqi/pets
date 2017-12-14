@@ -94,6 +94,7 @@ void user_cmd_deal_with_process(const druid_frame_t *p_frame, druid_frame_t *p_r
                 if (is_device_registered)
                 {
                     is_operate_success= true;
+                    is_current_connection_registered = true;
                     timers_start();
                 }
             }

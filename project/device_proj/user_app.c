@@ -73,7 +73,7 @@ APP_TIMER_DEF(m_auth_timer_id);
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
 #ifdef DEBUG_MODE
-#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(20000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(1800*1000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #else
 #define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(1800*1000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #endif
@@ -114,7 +114,7 @@ void sleep_mode_enter1(void)
 static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 {
     uint32_t err_code;
-//    LOG_PROC("ADV_EVENT", "EVENT");
+    LOG_PROC("ADV_EVENT", "EVENT%d", ble_adv_evt);
     switch (ble_adv_evt)
     {
     case BLE_ADV_EVT_FAST:
@@ -152,6 +152,8 @@ static void on_ble_evt(ble_evt_t *p_ble_evt)
         is_ble_connected = true;
         //is_need_request_time_stamp = true;
         is_ble_connected_event_come = true;
+
+        is_current_connection_registered = false;
 
         break; // BLE_GAP_EVT_CONNECTED
 
@@ -354,6 +356,12 @@ static void services_init(void)
  */
 uint8_t device_name_str[] = DEVICE_NAME;
 static void advertising_init(void);
+
+void user_advertising_init()
+{
+    advertising_init();
+}
+
 //void user_app_update_device_name(char *temp_humidity)
 void user_app_update_device_name(uint8_t temp, uint8_t humidity, uint8_t battery_level)
 {
@@ -416,6 +424,7 @@ static void gap_params_init(void)
  */
 static void advertising_init(void)
 {
+    LOG_INFO("advertising init");
     uint32_t err_code;
     ble_advdata_t advdata;
     ble_advdata_t scanrsp;
@@ -437,6 +446,13 @@ static void advertising_init(void)
     options.ble_adv_fast_enabled = true;
     options.ble_adv_fast_interval = APP_ADV_INTERVAL;
     //options.ble_adv_fast_timeout = APP_ADV_TIMEOUT_IN_SECONDSS;
+    if (is_device_registered)
+    {
+        app_adv_timeout_in_seconds = 0;
+    }
+    else{
+        app_adv_timeout_in_seconds = 30;
+    }
     options.ble_adv_fast_timeout = app_adv_timeout_in_seconds;
 
     err_code = ble_advertising_init(&advdata, &scanrsp, &options, on_adv_evt, NULL);

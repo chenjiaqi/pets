@@ -23,5 +23,6 @@ void user_app_update_device_name(uint8_t temp, uint8_t humidity, uint8_t battery
 void timers_time_stamp_request_stop();
 void timers_time_stamp_request_start();
 void disconnect_current_connection();
+void user_advertising_init();
 
 #endif //  SERVICES_H

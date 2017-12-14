@@ -44,6 +44,8 @@ command_info_t command_info = {
 
 uint32_t request_info_count = 128; // request count
 
+bool is_current_connection_registered = false;
+
  
  
 
