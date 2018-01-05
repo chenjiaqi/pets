@@ -393,6 +393,8 @@ void user_process(void)
         timers_time_stamp_request_stop();
         timers_led_stop();
         timers_beep_stop();
+        nrf_gpio_pin_set(USER_PIN_BEEP_1);
+        nrf_gpio_pin_set(USER_PIN_BEEP_2);
         if (is_device_registered == false)
         {
             LOG_INFO("should enter sleep");
