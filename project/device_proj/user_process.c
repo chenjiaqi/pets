@@ -276,12 +276,18 @@ void user_process(void)
         }
 
         static int16_t battery_level;
+        static int16_t battery_level2;
+        static int16_t battery_level3;
         static uint8_t battery;
 
         if(count % 64 == 0)
         {
+            
             nrf_gpio_pin_clear(6);
+            nrf_delay_ms(300);
             nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level);
+            nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level2);
+            nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level3);
             nrf_gpio_pin_set(6);
         }
 
@@ -289,7 +295,7 @@ void user_process(void)
         LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL), battery_level);
 
         user_ble_temp_humidity_update(&m_device_manager,value.temperatureH,value.humidityH);
-        battery = get_battery_level(battery_level);
+        battery = get_battery_level((battery_level+battery_level2+battery_level3)/3);
         user_app_update_device_name(value.temperatureH, value.humidityH, battery);
 
         count ++;
