@@ -381,12 +381,15 @@ void user_app_update_device_name(uint8_t temp, uint8_t humidity, uint8_t battery
         //LOG_INFO("UPDATE NAME");
     }
 }
+#include "nrf_delay.h"
 static void gap_params_init(void)
 {
     uint32_t err_code;
     ble_gap_conn_params_t gap_conn_params;
     ble_gap_conn_sec_mode_t sec_mode;
     int16_t battery_level;
+    int16_t battery_level2;
+    int16_t battery_level3;
     uint8_t battery;
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
@@ -397,10 +400,15 @@ static void gap_params_init(void)
     sprintf((char *)(device_name_str + 18), "%s", "_160021");
     //LOG_PROC("NAME", "%s", device_name_str);
     nrf_gpio_pin_clear(6);
+    nrf_delay_ms(300);
+
     nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level);
+    nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level2);
+    nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level3);
+
     nrf_gpio_pin_set(6);
 
-    battery = get_battery_level(battery_level);
+    battery = get_battery_level((battery_level + battery_level2+ battery_level3)/3);
     sprintf((char *)(device_name_str + 23), "%02X", battery);
 
 
@@ -512,8 +520,10 @@ static void led_timeout_handler(void *p_context)
 
 static void beep_timeout_handler(void *p_context)
 {
-    static uint32_t beep_count = 0;
-    if ((beep_count >> 10) % 3 == 0)
+    // 1/5 ms 
+    //static uint32_t beep_count = 0xfffff000;
+    static uint32_t beep_count = 0x00;
+    if ((beep_count >> 10) % 4 == 0)
     {
         if (beep_count % 2)
         {
