@@ -200,10 +200,9 @@ int main(void)
     user_app_init();
     nrf_gpio_cfg_output(USER_PIN_LED);
     nrf_gpio_pin_set(USER_PIN_LED);
-    //LOG_INFO("Start");
+    LOG_INFO("Start");
     nrf_gpio_cfg_output(USER_PIN_BEEP_1);
     nrf_gpio_cfg_output(USER_PIN_BEEP_2);
-#ifndef DEBUG_MODE    
     nrf_gpio_cfg(
         USER_PIN_BEEP_1,
         NRF_GPIO_PIN_DIR_OUTPUT,
@@ -223,100 +222,20 @@ int main(void)
         nrf_gpio_pin_clear(USER_PIN_BEEP_1);
         nrf_gpio_pin_clear(USER_PIN_BEEP_2);
 #endif
-#if 0
-    static uint8_t plantext[32] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,};
-    static uint8_t key[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-    static uint8_t dest[] = {0,};
-    AES128_ECB_encrypt(plantext, key, dest);
-    for(int i = 0; i <32; i++)
+
+    while(0)
     {
-        printf("%02x ", dest[i]);
+
+        nrf_gpio_pin_clear(USER_PIN_BEEP_1);
+        nrf_gpio_pin_set(USER_PIN_BEEP_2);
+        nrf_delay_us(250);
+        nrf_gpio_pin_set(USER_PIN_BEEP_1);
+        nrf_gpio_pin_clear(USER_PIN_BEEP_2);
+        nrf_delay_us(250);
+
     }
-    printf("\r\n");
-
-    AES128_ECB_decrypt(dest, key, plantext);
-    for(int i = 0; i <16; i++)
-    {
-        printf("%02x ", plantext[i]);
-    }
-    printf("\r\n");
-
-#endif
-
-    
-    // Enter main loop.
-#if 0
-    uint8_t addr_str[(BLE_GAP_ADDR_LEN << 1) + 1];
-    user_get_mac_address_str(addr_str);
-    //LOG_INFO("MAC ADDRESS is %s", addr_str);
-#endif
-    
-   //nrf_gpio_pin_clear(29); 
-#endif
     for (;;)
     {
-
-#if 0
-        static uint8_t test_count = 0;
-        nrf_gpio_pin_clear(USER_PIN_LED);
-        nrf_delay_ms(1000);
-        nrf_gpio_pin_set(USER_PIN_LED);
-        nrf_delay_ms(1000);
-        test_count++;
-        if(test_count % 3 == 0)
-        {
-
-            nrf_gpio_pin_clear(USER_PIN_LED);
-            nrf_delay_ms(3000);
-            nrf_gpio_pin_set(USER_PIN_LED);
-            //power_manage();
-            sleep_mode_enter();
-            nrf_delay_ms(1000);
-        }
-#endif
-
-#if 0
-        uint8_t m=180;
-        uint32_t count = 0;
-        while(1)
-        {
-            nrf_gpio_pin_clear(22);
-            nrf_gpio_pin_set(23);
-            //nrf_delay_ms(m);
-            nrf_delay_us(m);
-            nrf_gpio_pin_clear(23);
-            nrf_gpio_pin_set(22);
-            //nrf_delay_ms(m);
-            nrf_delay_us(m);
-
-            if(count % 300 == 0)
-            {
-                nrf_gpio_pin_clear(23);
-                nrf_gpio_pin_clear(22);
-                nrf_delay_ms(500);
-                //nrf_gpio_pin_clear(29); 
-            }
-
-            count ++;
-
-            /*
-            nrf_gpio_pin_clear(23);
-            nrf_gpio_pin_clear(22);
-            nrf_delay_ms(1000)
-            */
-        }
-#endif
-
-#if 0
-        while(1)
-        {
-
-            //test_druid_frame();
-            //test_aes();
-            test_proto();
-            nrf_delay_ms(3000);
-        }
-#endif
         user_process();
         power_manage();
     }

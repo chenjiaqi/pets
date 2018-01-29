@@ -23,7 +23,7 @@
  #define LIS3DH_INT1_PIN 11
  #define LIS3DH_INT2_PIN 12
 
- #define CONVERT_MAX_VALUE     580
+ #define CONVERT_MAX_VALUE     593
  #define BATTERY_INITIAL_VALUE 33
  
 

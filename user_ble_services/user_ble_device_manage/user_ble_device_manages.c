@@ -97,9 +97,10 @@ static uint32_t device_manage_humidity_char_add(user_ble_device_manage_t *p_devi
     ble_gatts_attr_t    attr_char_value;
     ble_uuid_t          ble_uuid;
     ble_gatts_attr_md_t attr_md;
-    uint8_t init_value_encode[1];
+    uint8_t init_value_encode[2];
     memset(&char_md, 0, sizeof(char_md));
-    init_value_encode[0] = 15;
+    init_value_encode[0] = 0x11;
+    init_value_encode[1] = 0x11;
 
     char_md.char_props.read = 1;
 //    char_md.char_props.write = 1;
@@ -124,9 +125,9 @@ static uint32_t device_manage_humidity_char_add(user_ble_device_manage_t *p_devi
 
     attr_char_value.p_uuid = &ble_uuid;
     attr_char_value.p_attr_md = &attr_md;
-    attr_char_value.init_len = sizeof(uint8_t);
+    attr_char_value.init_len = sizeof(uint16_t);
     attr_char_value.init_offs = 0;
-    attr_char_value.max_len = sizeof(uint8_t);
+    attr_char_value.max_len = sizeof(uint16_t);
     attr_char_value.p_value = (uint8_t *)init_value_encode;
 
     return sd_ble_gatts_characteristic_add(p_device_manage->service_handle,
@@ -316,7 +317,7 @@ void user_ble_device_manage_on_ble_event(user_ble_device_manage_t *p_dev_manage,
     }
 }
 
-uint32_t user_ble_temp_humidity_update(user_ble_device_manage_t *p_device_manage, uint8_t temp, uint8_t humidity)
+uint32_t user_ble_temp_humidity_update(user_ble_device_manage_t *p_device_manage, uint8_t temp, uint16_t humidity)
 {
     if(p_device_manage == NULL)
     {
@@ -344,6 +345,7 @@ uint32_t user_ble_temp_humidity_update(user_ble_device_manage_t *p_device_manage
     //LOG_PROC("HANDLE","%d", p_device_manage->humidity_level_handle);
     //LOG_PROC("HANDLE","%d", p_device_manage->led_handle);
     gatts_value.p_value = &humidity;
+    gatts_value.len = sizeof(uint16_t);
     err_code = sd_ble_gatts_value_set(BLE_CONN_HANDLE_INVALID, 
                                     p_device_manage->humidity_level_handle.value_handle,
                                     &gatts_value);

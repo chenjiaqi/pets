@@ -73,12 +73,13 @@ APP_TIMER_DEF(m_auth_timer_id);
 #define MAX_CONN_PARAMS_UPDATE_COUNT    3                                           /**< Number of attempts before giving up the connection parameter negotiation. */
 
 #ifdef DEBUG_MODE
-#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(1800*1000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
+#define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(3000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #else
 #define TEMPERTURE_ACQUISITION_MEAS_INTERVAL     APP_TIMER_TICKS(1800*1000, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
 #endif
 #define LED_MEAS_INTERVAL     APP_TIMER_TICKS(1500, APP_TIMER_PRESCALER)  /**< Battery level measurement interval (ticks). */
-#define BEEP_MEAS_INTERVAL     APP_TIMER_TICKS(1, APP_TIMER_PRESCALER) / 5  /**< Battery level measurement interval (ticks). */
+//#define BEEP_MEAS_INTERVAL     APP_TIMER_TICKS(1, APP_TIMER_PRESCALER) / 5  /**< Battery level measurement interval (ticks). */
+#define BEEP_MEAS_INTERVAL    6 /**< Battery level measurement interval (ticks). */
 #define TIME_STAMP_REQUEST_MEAS_INTERVAL     APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER)   /**< Battery level measurement interval (ticks). */
 #define AUTH_MEAS_INTERVAL     APP_TIMER_TICKS(5000, APP_TIMER_PRESCALER)   /**< Battery level measurement interval (ticks). */
 
@@ -258,7 +259,7 @@ static void uart_init(void)
 //            RX_PIN_NUMBER,
 //            TX_PIN_NUMBER,
             31,
-            22,
+            26,
             RTS_PIN_NUMBER,
             CTS_PIN_NUMBER,
             APP_UART_FLOW_CONTROL_DISABLED,
@@ -518,11 +519,12 @@ static void led_timeout_handler(void *p_context)
     is_need_turn_on_led = true;
 }
 
+    static uint32_t beep_count = 0x00;
 static void beep_timeout_handler(void *p_context)
 {
     // 1/5 ms 
     //static uint32_t beep_count = 0xfffff000;
-    static uint32_t beep_count = 0x00;
+    
     if ((beep_count >> 10) % 4 == 0)
     {
         if (beep_count % 2)
@@ -607,6 +609,8 @@ void timers_stop()
 
 void timers_beep_start()
 {
+
+    beep_count = 0x00;
     app_timer_start(m_beep_timer_id, BEEP_MEAS_INTERVAL, NULL);
 }
 
@@ -721,4 +725,7 @@ void user_app_init(void)
     {
         timers_start();
     }
+
+    is_need_acquire_temp = true;
+    //LOG_PROC("BEEP","%d",BEEP_MEAS_INTERVAL);
 }

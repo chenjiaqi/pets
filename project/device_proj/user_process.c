@@ -44,75 +44,7 @@ static user_flash_structure_t user_flash_struct;
 
 extern bool is_need_turn_on_led;
 
-#if 0 
-static void fs_evt_handler(fs_evt_t const * const evt, fs_ret_t result);
-FS_REGISTER_CFG(fs_config_t fs_config) =
-{
-        .callback = fs_evt_handler, // Function for event callbacks.
-        .num_pages = 80,             // Number of physical flash pages required.
-        .priority = 0xFE            // Priority for flash usage.
-};
 
-
-static void fs_evt_handler(fs_evt_t const * const evt, fs_ret_t result)
-{
-    if (result != FS_SUCCESS)
-    {
-        //bsp_indication_set(BSP_INDICATE_FATAL_ERROR);
-    }
-    else
-    {
-        LOG_EVENT("fstorage command completed");
-        fs_call_back_flag = true;
-    }
-}
-
-
-
-static void store_temp_humity_to_flash()
-{
-    LOG_INFO("Current Store address is: %x", (unsigned int)(fs_config.p_start_addr + current_store_flash_point));
-    //LOG_INFO("%x", *(fs_config.p_start_addr + current_store_flash_point));
-    while(*(fs_config.p_start_addr + current_store_flash_point) != 0xFFFFFFFF)
-    {
-        current_store_flash_point++;
-    }
-
-    fs_call_back_flag = true;
-    fs_store(&fs_config, fs_config.p_start_addr + current_store_flash_point, (uint32_t *)&user_flash_struct, sizeof(user_flash_struct)/sizeof(uint32_t), NULL);
-    while (!fs_call_back_flag)
-    {
-        power_manage();
-    }
-}
-
-#endif
-
-#if 0
-static void start_to_trans_data_fo_app()
-{
-    uint32_t err_code;
-    static uint32_t current_position = 0;
-    current_position = current_store_flash_point;
-    LOG_PROC("--->","START");
-    //for(int i = 0; i < current_position; i += 2)
-    for (int i = 0; i < current_position / 2; i += 2)
-    {
-        do
-        {
-            err_code = user_ble_device_manage_cmd_rsp_send(&m_device_manager,(uint8_t *)(fs_config.p_start_addr + i * 2), 16);
-            if (err_code == NRF_ERROR_INVALID_STATE)
-            {
-                LOG_ERROR("BLE disconnect or notification off");
-                return;
-            }
-
-        } while (err_code != NRF_SUCCESS);
-    }
-
-    LOG_PROC("--->","OVER %lx",LOG_UINT(fs_config.p_start_addr + current_position));
-}
-#endif
 
 
 
@@ -190,8 +122,6 @@ static void deal_with_frame_from_queue()
             }
         }while(p_split_frame);
         //printf("send over\r\n");
-
-
         /*
         LOG_INFO(" ");
         for (int i = 0; i < len; i++)
@@ -207,15 +137,6 @@ static void deal_with_frame_from_queue()
         LOG_INFO("invalid");
     }
 
-#if 0 
-    LOG_INFO("deal with frame, length is %d", len);
-    LOG_INFO(" ");
-    for(int i = 0; i <len; i++)
-    {
-        printf("%02X ", recv_frame[i]);
-    }
-    LOG_INFO(" ");
-#endif
 }
 
 void user_process(void)
@@ -248,17 +169,10 @@ void user_process(void)
         static MyDHT11 value;
         static uint8_t count = 0;
 
-#ifdef USER_USE_DHT11_SENSOR
-        while(start_to_read(&value) != NRF_SUCCESS)
-        {
-            nrf_delay_ms(200);
-        }
-#else
         int32_t temp = 0;
         sd_temp_get(&temp);
         value.temperatureH =(uint8_t)temp/4;
         value.humidityH = 0;
-#endif
 
         is_need_acquire_temp = false;
         if (count % 2)
@@ -280,27 +194,34 @@ void user_process(void)
         static int16_t battery_level3;
         static uint8_t battery;
 
-        if(count % 64 == 0)
+        if(count % 2 == 0)
         {
-            
+            bool ret = false;
             nrf_gpio_pin_clear(6);
             nrf_delay_ms(300);
             nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level);
+            nrf_delay_ms(30);
             nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level2);
+            nrf_delay_ms(30);
             nrf_drv_saadc_sample_convert(NRF_SAADC_INPUT_AIN3 ,&battery_level3);
             nrf_gpio_pin_set(6);
         }
 
         LOG_PROC("INFO", "%u:HUMIDITY:%d.%d, TEMPERTURE:%d.%d, %d",LOG_UINT(current_time_stamp),LOG_UINT(value.humidityH), LOG_UINT(value.humidityL),
-        LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL), battery_level);
+        LOG_UINT(value.temperatureH),LOG_UINT(value.temperatureL), battery_level + battery_level2 + battery_level3);
 
-        user_ble_temp_humidity_update(&m_device_manager,value.temperatureH,value.humidityH);
+
+        user_ble_temp_humidity_update(&m_device_manager,value.temperatureH,battery_level + battery_level2 + battery_level3);
         battery = get_battery_level((battery_level+battery_level2+battery_level3)/3);
+        LOG_PROC("INFO","current berrery is %d", battery);
         user_app_update_device_name(value.temperatureH, value.humidityH, battery);
 
         count ++;
-
-        //lis3dh_test();
+        LOG_PROC("DEV","%d", count);
+        if(count >=64)
+        {
+            count = 1;
+        }
         
     }
 
@@ -355,13 +276,6 @@ void user_process(void)
             // disconnected when in trans
             // write current pos into flash
         }
-    }
-
-    if (command_info.is_need_deal)
-    {
-        //LOG_PROC("CMD","%d, %d",command_info.command, command_info.params_length);
-        deal_width_command(command_info.command, command_info.params, command_info.params_length);
-        command_info.is_need_deal = false;
     }
 
     if (is_need_turn_on_led)
@@ -422,12 +336,5 @@ void user_process(void)
         nrf_gpio_pin_set(USER_PIN_BEEP_1);
         nrf_gpio_pin_set(USER_PIN_BEEP_2);
         is_beep_stopped = false;
-    }
-
-    if (is_lis3dh_int_come)
-    {
-        //LOG_INFO("LIS3DH int come");
-        is_lis3dh_int_come = false;
-        ble_advertising_start(BLE_ADV_MODE_FAST);
     }
 }

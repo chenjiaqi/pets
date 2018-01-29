@@ -56,7 +56,7 @@ uint32_t user_ble_device_manage_init(user_ble_device_manage_t *p_device_manage,
 
 void user_ble_device_manage_on_ble_event(user_ble_device_manage_t *p_dev_manage, ble_evt_t * p_ble_evt);
 
-uint32_t user_ble_temp_humidity_update(user_ble_device_manage_t *p_device_manage, uint8_t temp, uint8_t humidity);
+uint32_t user_ble_temp_humidity_update(user_ble_device_manage_t *p_device_manage, uint8_t temp, uint16_t humidity);
 
 uint32_t user_ble_device_manage_cmd_rsp_send(user_ble_device_manage_t * p_device_manage,
                                             uint8_t * p_string, uint16_t length);
